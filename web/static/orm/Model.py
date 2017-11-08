@@ -50,7 +50,7 @@ def create_pool(loop, **kwargs):
 
 @asyncio.coroutine
 def select(sql, args, size=None):
-    logging.info("sql->(%s),args->(%s)" % (sql, args))
+    logging.info("select,sql->(%s),args->(%s)" % (sql, args))
     with (yield from __pool) as conn:
         cursor = yield from conn.cursor(aiomysql.DictCursor)
         yield from cursor.execute(sql.replace('?', '%s'), args or ())
@@ -59,5 +59,24 @@ def select(sql, args, size=None):
         else:
             rs = yield from cursor.fetchall()
         yield from cursor.close()
-        logging.info('rows returned: %s' % len(rs))
+        logging.info('rows returned: %s, result -> %s' % (len(rs), str(rs)))
         return rs
+
+
+@asyncio.coroutine
+def execute(sql, args):
+    logging.info("insert/delete/update,sql->(%s),args->(%s)" % (sql, args))
+    with (yield from __pool) as conn:
+        try:
+            cur = yield from conn.cursor()
+            yield from cur.execute(sql.replace('?', '%s'), args)
+            rows = cur.rowcount
+            yield from cur.close()
+        except BaseException:
+            raise
+        return rows
+
+
+
+
+
