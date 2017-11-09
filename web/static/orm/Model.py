@@ -29,6 +29,20 @@ class Model(dict, metaclass=ModelMetaclass):
                 setattr(self, key, field_value)
         return field_value
 
+    # 通过cls参数传递当前类对象
+    @classmethod
+    @asyncio.coroutine
+    def find_one_user(cls, args):
+        rs = yield from select("%s where %s = ?" % (cls.__select__, cls.__primary_key__), (args), 1)
+        if len(rs)==0:
+            return None
+        else:
+            return cls(**rs[0])
+
+    @asyncio.coroutine
+    def save_one_user(self):
+        return None
+
 
 @asyncio.coroutine
 def create_pool(loop, **kwargs):
@@ -47,6 +61,8 @@ def create_pool(loop, **kwargs):
         loop=loop
     )
 
+# 提供给Model查询接口
+
 
 @asyncio.coroutine
 def select(sql, args, size=None):
@@ -61,6 +77,8 @@ def select(sql, args, size=None):
         yield from cursor.close()
         logging.info('rows returned: %s, result -> %s' % (len(rs), str(rs)))
         return rs
+
+# 提供Model增删改接口
 
 
 @asyncio.coroutine

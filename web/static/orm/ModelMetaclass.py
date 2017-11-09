@@ -39,7 +39,8 @@ class ModelMetaclass(type):
             raise RuntimeError("Primary key not found")
         for key in mappings.keys():
             attrs.pop(key)
-        escaped_fields = list(map(lambda f: '`%s`' % f, fields))
+        escaped_fields = list(map(str, fields))
+        logging.info("escaped_fields - > %s" % str(escaped_fields))
         attrs['__mappings__'] = mappings  # 保存属性和列的映射关系
         attrs['__table__'] = table_name
         attrs['__primary_key__'] = primary_key_temp  # 主键属性名
