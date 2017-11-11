@@ -1,47 +1,11 @@
-# -*-coding:utf-8-*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+
 import logging; logging.basicConfig(level=logging.INFO)
-import asyncio, aiomysql
+import asyncio
+import aiomysql
 from web.static.orm import ModelMetaclass
-
-
-class Model(dict, metaclass=ModelMetaclass):
-    def __init__(self, **kwargs):
-        super(Model, self).__init__(**kwargs)
-
-    def __getattr__(self, item):
-        try:
-            return self[item]
-        except KeyError:
-            raise AttributeError(r"Model has no attribute (%s)" % item)
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-    def get_value(self, key):
-        return getattr(self, key, None)
-
-    def get_value_or_default(self, key):
-        value = getattr(self, key)
-        if value is None:
-            field_value = self.__mappings__[key]
-            if field_value.default is not None:
-                logging.info("find default value (key:%s) = (val:%s)" % (key, field_value))
-                setattr(self, key, field_value)
-        return field_value
-
-    # 通过cls参数传递当前类对象
-    @classmethod
-    @asyncio.coroutine
-    def find_one_user(cls, args):
-        rs = yield from select("%s where %s = ?" % (cls.__select__, cls.__primary_key__), (args), 1)
-        if len(rs)==0:
-            return None
-        else:
-            return cls(**rs[0])
-
-    @asyncio.coroutine
-    def save_one_user(self):
-        return None
 
 
 @asyncio.coroutine
@@ -93,6 +57,54 @@ def execute(sql, args):
         except BaseException:
             raise
         return rows
+
+
+class Model(dict, metaclass=ModelMetaclass):
+    def __init__(self, **kwargs):
+        super(Model, self).__init__(**kwargs)
+
+    def __getattr__(self, item):
+        try:
+            return self[item]
+        except KeyError:
+            raise AttributeError(r"Model has no attribute (%s)" % item)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def get_value(self, key):
+        return getattr(self, key, None)
+
+    def get_value_or_default(self, key):
+        value = getattr(self, key)
+        if value is None:
+            field_value = self.__mappings__[key]
+            if field_value.default is not None:
+                logging.info("find default value (key:%s) = (val:%s)" % (key, field_value))
+                setattr(self, key, field_value)
+        return field_value
+
+    # 通过cls参数传递当前类对象
+    @classmethod
+    @asyncio.coroutine
+    def find_one_user(cls, args):
+        rs = yield from select("%s where %s = ?" % (cls.__select__, cls.__primary_key__), (args), 1)
+        if len(rs) == 0:
+            return None
+        else:
+            return cls(**rs[0])
+
+    @asyncio.coroutine
+    def save_one_user(self):
+        args = list(map(self.get_value_or_default, self.__fields__))
+        args.append(self.get_value_or_default(self.__primary_key__))
+        rows = yield from execute(self.__insert__, args)
+        if rows != 1:
+            logging.warning('failed to insert record: affected rows: %s' % rows)
+
+
+_loop = asyncio.get_event_loop()
+create_pool(_loop, user='root', password='123456', db='freesiawebsite')
 
 
 

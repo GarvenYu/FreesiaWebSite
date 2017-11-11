@@ -1,4 +1,6 @@
-# 源类
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import logging; logging.basicConfig(level=logging.INFO)
 from web.static.orm.Field import Field
 
@@ -46,10 +48,18 @@ class ModelMetaclass(type):
         attrs['__primary_key__'] = primary_key_temp  # 主键属性名
         attrs['__fields__'] = fields  # 除主键外的属性名
         # 构造默认的SELECT, INSERT, UPDATE和DELETE语句:
-        attrs['__select__'] = 'select `%s`, %s from `%s`' % (primary_key_temp, ', '.join(escaped_fields), table_name)
-        attrs['__insert__'] = 'insert into `%s` (%s, `%s`) values (%s)' % (
-            table_name, ', '.join(escaped_fields), primary_key_temp, create_args_string(len(escaped_fields) + 1))
+        attrs['__select__'] = 'select %s, %s from %s' % (primary_key_temp, ', '.join(escaped_fields), table_name)
+        attrs['__insert__'] = 'insert into %s (%s, %s) values (%s)' % (
+            table_name, ', '.join(escaped_fields), primary_key_temp,
+            ModelMetaclass.create_args_string(len(escaped_fields) + 1))
         attrs['__update__'] = 'update `%s` set %s where `%s`=?' % (
-            table_name, ', '.join(map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)), primary_key_temp)
-        attrs['__delete__'] = 'delete from `%s` where `%s`=?' % (table_name, primary_key_temp)
+            table_name, ', '.join(map(lambda f: '%s=?' % (mappings.get(f).name or f), fields)), primary_key_temp)
+        attrs['__delete__'] = 'delete from %s where %s=?' % (table_name, primary_key_temp)
         return type.__new__(cls, name, bases, attrs)
+
+    @staticmethod
+    def create_args_string(number):
+        mist = []
+        for n in range(number):
+            mist.append('?')
+        return ','.join(mist)
