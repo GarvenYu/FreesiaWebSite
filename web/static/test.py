@@ -1,4 +1,8 @@
 # -*-coding:utf-8-*-
+
+import time, uuid
+
+
 class MyDict(dict):
     name = 'ykb'
 
@@ -14,4 +18,6 @@ print(','.join(L))
 d = MyDict(name='ddd')
 print(d['name'])
 print(MyDict.name)
-print("%s -> `%s`" % ('wer', 'qw'))
+print("%012d" % 12)
+print('%015d%s000' % (int(time.time() * 1000), uuid.uuid4().hex))
+

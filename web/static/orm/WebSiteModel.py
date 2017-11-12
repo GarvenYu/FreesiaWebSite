@@ -3,7 +3,7 @@
 
 
 import time, uuid
-from web.static.orm import Model
+from web.static.orm.Model import Model
 from web.static.orm.Field import StringField, BooleanField, IntField, TextField, FloatField
 
 
@@ -14,14 +14,16 @@ def next_id():
 class User(Model):
     __table__ = 'users'
 
-    id = StringField(column_type='varchar(50)', primary_key=True, default=next_id)
+    id = StringField(column_type='varchar(50)', primary_key=True, default=next_id())
     email = StringField(column_type='varchar(50)')
     passwd = StringField(column_type='varchar(50)')
     admin = BooleanField()
     name = StringField(column_type='varchar(50)')
     image = StringField(column_type='varchar(500)')
-    created_at = FloatField(default=time.time)
+    created_at = FloatField(default=time.time())
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 class Blog(Model):
     __table__ = 'blogs'

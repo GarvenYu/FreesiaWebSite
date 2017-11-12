@@ -5,7 +5,7 @@
 import logging; logging.basicConfig(level=logging.INFO)
 import asyncio
 import aiomysql
-from web.static.orm import ModelMetaclass
+from web.static.orm.ModelMetaclass import ModelMetaclass
 
 
 @asyncio.coroutine
@@ -17,13 +17,20 @@ def create_pool(loop, **kwargs):
         port=kwargs.get('port', 3306),
         user=kwargs['user'],
         password=kwargs['password'],
-        db=kwargs['db'],
+        db=kwargs['database'],
         charset=kwargs.get('charset', 'utf8'),
         autocommit=kwargs.get('autocommit', True),
         maxsize=kwargs.get('maxsize', 10),
         minsize=kwargs.get('minsize', 1),
         loop=loop
     )
+
+
+@asyncio.coroutine
+def destroy_pool():
+    if __pool is not None:
+        __pool.close()
+        yield from __pool.wait_closed()
 
 # 提供给Model查询接口
 
@@ -61,13 +68,13 @@ def execute(sql, args):
 
 class Model(dict, metaclass=ModelMetaclass):
     def __init__(self, **kwargs):
-        super(Model, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def __getattr__(self, item):
         try:
             return self[item]
         except KeyError:
-            raise AttributeError(r"Model has no attribute (%s)" % item)
+            raise AttributeError("Model has no attribute (%s)" % item)
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -81,8 +88,9 @@ class Model(dict, metaclass=ModelMetaclass):
             field_value = self.__mappings__[key]
             if field_value.default is not None:
                 logging.info("find default value (key:%s) = (val:%s)" % (key, field_value))
-                setattr(self, key, field_value)
-        return field_value
+                setattr(self, key, field_value.default)
+            return field_value.default
+        return value
 
     # 通过cls参数传递当前类对象
     @classmethod
@@ -96,6 +104,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @asyncio.coroutine
     def save_one_user(self):
+        logging.info("fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
         args = list(map(self.get_value_or_default, self.__fields__))
         args.append(self.get_value_or_default(self.__primary_key__))
         rows = yield from execute(self.__insert__, args)
@@ -103,8 +112,8 @@ class Model(dict, metaclass=ModelMetaclass):
             logging.warning('failed to insert record: affected rows: %s' % rows)
 
 
-_loop = asyncio.get_event_loop()
-create_pool(_loop, user='root', password='123456', db='freesiawebsite')
+
+
 
 
 

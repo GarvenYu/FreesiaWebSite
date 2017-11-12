@@ -26,7 +26,7 @@ class ModelMetaclass(type):
         # 注意这里attrs的key是字段名，value是字段实例，不是字段的具体值
         # 比如User类的id=StringField(...) 这个value就是这个StringField的一个实例，而不是实例化
         # 的时候传进去的具体id值
-        for k,v in attrs.items():
+        for k, v in attrs.items():
             # attrs同时还会拿到一些其它系统提供的类属性，我们只处理自定义的类属性，所以判断一下
             # isinstance 方法用于判断v是否是一个Field
             if isinstance(v, Field):
