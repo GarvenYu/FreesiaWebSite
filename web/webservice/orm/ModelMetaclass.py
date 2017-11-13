@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging; logging.basicConfig(level=logging.INFO)
-from web.static.orm.Field import Field
+from web.webservice.orm.Field import Field
 
 
 class ModelMetaclass(type):

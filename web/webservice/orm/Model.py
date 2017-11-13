@@ -5,7 +5,7 @@
 import logging; logging.basicConfig(level=logging.INFO)
 import asyncio
 import aiomysql
-from web.static.orm.ModelMetaclass import ModelMetaclass
+from web.webservice.orm.ModelMetaclass import ModelMetaclass
 
 
 @asyncio.coroutine

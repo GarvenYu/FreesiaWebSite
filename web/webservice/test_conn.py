@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 
-from web.static.orm.WebSiteModel import User
-from web.static.orm.Model import create_pool, destroy_pool
+from web.webservice.orm.WebSiteModel import User
+from web.webservice.orm.Model import create_pool, destroy_pool
 import asyncio
 import logging
 

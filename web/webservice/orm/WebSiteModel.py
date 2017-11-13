@@ -3,8 +3,8 @@
 
 
 import time, uuid
-from web.static.orm.Model import Model
-from web.static.orm.Field import StringField, BooleanField, IntField, TextField, FloatField
+from web.webservice.orm.Model import Model
+from web.webservice.orm.Field import StringField, BooleanField, IntField, TextField, FloatField
 
 
 def next_id():
@@ -24,6 +24,7 @@ class User(Model):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
 
 class Blog(Model):
     __table__ = 'blogs'
