@@ -1,23 +1,26 @@
 # -*-coding:utf-8-*-
 
-import time, uuid
+all_items = [67, 22, 33, 44, 55, 66, 77, 88, 99]
 
 
-class MyDict(dict):
-    name = 'ykb'
+def dictsort():
+    dic = dict()
 
-    def __init__(self, name):
-        super(MyDict, self).__init__(name=name)
+    # loop
+    for value in all_items:
+        if value > 66:
+            if "k1" in dic.keys():
+                dic["k1"].append(value)
+            else:
+                dic["k1"] = [value]
+        else:
+            if "k2" in dic.keys():
+                dic["k2"].append(value)
+            else:
+                dic["k2"] = [value]
+    print(dic)
 
 
-L = []
-for n in range(5):
-    L.append('?')
-print(','.join(L))
-
-d = MyDict(name='ddd')
-print(d['name'])
-print(MyDict.name)
-print("%012d" % 12)
-print('%015d%s000' % (int(time.time() * 1000), uuid.uuid4().hex))
+if __name__ == '__main__':
+    dictsort()
 
