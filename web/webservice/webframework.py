@@ -81,7 +81,7 @@ def has_kwargs(fn):
             return False
 
 
-# 判断是否有命名关键字参数，该命名关键字参数后面没有别的类型参数，且包含request
+# 判断是否有命名关键字参数，它包含了request，该命名关键字参数后面没有别的类型参数。
 def has_request_args_last(fn):
     params = inspect.signature(fn).parameters
     sig = inspect.signature(fn)  # -> (*, request, name)
@@ -97,13 +97,36 @@ def has_request_args_last(fn):
     return flag
 
 
-# 从request中获取参数给对应的URL处理函数
+# 提取URL处理函数的特征，与request中获取的参数进行比较，分发处理。
 class RequestHandler(object):
     def __init__(self, app, fn):
         self.__app = app
         self.__fn = fn
-        self.__named_kwargs_without_default = get_named_kwargs_without_default(fn)
-        self.__named_kwargs = get_named_kwargs(fn)
+        self.__named_kwargs_without_default = get_named_kwargs_without_default(fn) # tuple
+        self.__named_kwargs = get_named_kwargs(fn) # tuple
         self.__has_named_kwargs = has_named_kwargs(fn)
-        self.__has_kwargs = has_kwargs(fn)
+        self.__has_kwargs = has_kwargs(fn) # 有没有关键字参数
         self.__has_request_args_last = has_request_args_last(fn)
+
+    @asyncio.coroutine
+    def __call__(self, request):
+        kw = None
+        # 如果URL处理函数有关键字参数或者命名关键字参数或者带默认值的命名关键字参数
+        if self.__has_kwargs or self.__has_named_kwargs or self.__named_kwargs_without_default:
+            if request.method == 'POST':
+                if not request.content_type:
+                    return web.HTTPBadRequest(reason='Missing Content Type')
+                con_typ = request.content_type.lower()
+                if con_typ.startswith('application/json'):
+                    params = request.json()  # json数据转为dict格式
+                    if not isinstance(dict, params):
+                        return web.HTTPBadRequest(reason='JSON body must be object.')
+                    kw = params
+                elif con_typ.startswith('application/x-www-form-urlencoded') or con_typ.startswith('multipart/form-data'):
+                    params = request.post()  # Returns MultiDictProxy instance filled with parsed data.
+                    kw = dict(**params)
+                else:
+                    return web.HTTPBadRequest(reason='Unsupported Content-Type: %s' % request.content_type)
+            if request.method == 'GET':
+                pass
+
