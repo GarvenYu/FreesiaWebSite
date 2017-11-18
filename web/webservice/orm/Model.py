@@ -10,7 +10,7 @@ from web.webservice.orm.ModelMetaclass import ModelMetaclass
 
 @asyncio.coroutine
 def create_pool(loop, **kwargs):
-    logging.info("create database connection pool...")
+    logging.info("connecting database pool...")
     global __pool
     __pool = yield from aiomysql.create_pool(
         host=kwargs.get('host', 'localhost'),

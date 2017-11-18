@@ -184,3 +184,25 @@ def add_route(app, fn):
         (method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
     app.router.add_route(method, path, RequestHandler(app, fn))
 
+
+# 批量注册URL处理函数
+# 动态加载
+def add_routes(app, module_name):
+    n = module_name.rfind('.')
+    if n == -1:  # 传入的模块名是xxx
+        out_module = __import__(module_name, globals(), locals())  # 动态加载
+        logging.info('globals = %s', globals()['__name__'])
+    else:  # 传入的模块名是xxx.py
+        out_module = __import__(module_name[:n], globals(), locals())
+    for attr in dir(out_module):  # 以list形式返回module所有属性和方法,每个为str
+        if attr.startswith('_'):  # 如果是_开头，代表是类变量，不是我们定义的方法
+            continue
+        fn = getattr(out_module, attr)
+        if callable(fn):
+            if getattr(fn, '__method__', None) and getattr(fn, '__route__', None):
+                add_route(app, fn)  # 防止到add_route方法里检测报错
+
+
+# 添加静态资源
+def add_static(app):
+    pass
