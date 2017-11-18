@@ -39,6 +39,11 @@ def post(path):
 
 
 # 使用inspect模块，来处理映射不同URL的函数的所需参数和request参数的关系
+# POSITIONAL_ONLY		只能是位置参数
+# POSITIONAL_OR_KEYWORD	可以是位置参数也可以是关键字参数
+# VAR_POSITIONAL		可变参数相当于是 *args
+# KEYWORD_ONLY			命名关键字参数且提供了key，相当于是 *,key
+# VAR_KEYWORD			关键字参数相当于是 **kw
 
 # 收集没有默认值的命名关键字参数,返回的是参数的名字
 def get_named_kwargs_without_default(fn):
@@ -81,7 +86,7 @@ def has_kwargs(fn):
             return False
 
 
-# 判断是否有命名关键字参数，它包含了request，该命名关键字参数后面没有别的类型参数。
+# 判断request是否为位置参数的最后一个。
 def has_request_args_last(fn):
     params = inspect.signature(fn).parameters
     sig = inspect.signature(fn)  # -> (*, request, name)
@@ -113,8 +118,8 @@ class RequestHandler(object):
         kw = None
         # 如果URL处理函数有关键字参数或者命名关键字参数或者带默认值的命名关键字参数
         if self.__has_kwargs or self.__has_named_kwargs or self.__named_kwargs_without_default:
-            if request.method == 'POST':
-                if not request.content_type:
+            if request.method == 'POST':  # POST请求可以是json格式的数据，或者是表单字典格式的数据
+                if not request.content_type:  # Returns str like 'text/html'
                     return web.HTTPBadRequest(reason='Missing Content Type')
                 con_typ = request.content_type.lower()
                 if con_typ.startswith('application/json'):
@@ -127,6 +132,41 @@ class RequestHandler(object):
                     kw = dict(**params)
                 else:
                     return web.HTTPBadRequest(reason='Unsupported Content-Type: %s' % request.content_type)
-            if request.method == 'GET':
-                pass
+            if request.method == 'GET':  # GET请求直接从URL里取参数
+                qs = request.query_string  # The query string in the URL, e.g., id=10.Read-only str property.
+                if qs:
+                    kw = dict()
+                    for key, value in parse.parse_qs(qs, keep_blank_values=True).items():
+                        # parse_qs 数据以字典形式返回. The dictionary keys are the unique query variable
+                        # names and value值是每个key值的list，所以取value[0].
+                        # keep_blank_values 为true则在parse时，遇到value为空格就保留空格串
+                        kw[key] = value[0]
+        if kw is None:  # kw为空说明是通过 /method/{key}访问
+            kw = dict(**request.match_info)  # match_info{key:value}
+        else:  # 如果从request中获取到了参数
+            if not self.__has_kwargs and self.__has_named_kwargs:  # 如果处理函数没有关键字参数，有命名关键字参数
+                copy = dict()
+                for key, value in kw.items():
+                    if key in self.__named_kwargs:
+                        copy[key] = kw[key]
+                    kw = copy
+                # 检查命名关键字参数的参数名是否和match_info中的参数名重复
+            for key, value in request.match_info.items():
+                if key in kw:
+                    logging.warning('Duplicate arg name in named arg and kw args: %s' % key)
+                    kw[key] = value
+        if self.__has_request_args_last:  # 如果有名为request的参数
+            kw['request'] = request
+        if self.__named_kwargs_without_default:  # 如果有不含默认值的命名关键字参数
+            for key in self.__named_kwargs_without_default:
+                if key not in kw:  # 如果构造的参数dict kw里没有必须要有的此参数
+                    return web.HTTPBadRequest(reason='Missing argument: %s' % key)
+        logging.info('call with args: %s' % str(kw))  # 打印参数dict（从request中获取）
+        try:
+            result = yield from self.__fn(**kw)
+            return result
+        except APIError as e:
+            return dict(error=e.error, data=e.data, message=e.message)
+
+
 

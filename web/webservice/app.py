@@ -9,9 +9,15 @@ def index(request):
 
 
 def hello(request):
-    logging.info(request.match_info)
+    logging.info(request.match_info)  # MatchInfo {'name': 'ykb'}
     text = '<h1>hello, %s!</h1>' % request.match_info['name']
     return web.Response(body=text.encode('utf-8'), content_type='text/html', charset='UTF-8')
+
+
+def hello_query_string(request):
+    logging.info(request.query_string)  # name=qwer
+    # text = '<h1>hello, %s!</h1>' % request.match_info['name']
+    # return web.Response(body=text.encode('utf-8'), content_type='text/html', charset='UTF-8')
 
 
 @asyncio.coroutine
@@ -19,6 +25,7 @@ def init(loop_param):
     app = web.Application(loop=loop_param)
     app.router.add_route('GET', '/', index)
     app.router.add_route('GET', '/hello/{name}', hello)
+    app.router.add_route('GET', '/hello2', hello_query_string)
     srv = yield from loop.create_server(app.make_handler(), '127.0.0.1', 9000)
     logging.info('server started at http://127.0.0.1:9000...')
     return srv
