@@ -6,10 +6,11 @@ import functools
 import inspect, asyncio
 from aiohttp import web
 from urllib import parse
+from web.webservice.apierror import APIError
 import logging
 logging.basicConfig(level=logging.INFO)
 
-# 定义GET/POST方法的装饰器，分别添加__method__属性和__route__属性，来标记某个URL处理函数的性质以及路径
+# 定义GET/POST方法的装饰器，分别添加__method__属性和__route__属性(因为aiohttp的add_route方法需要请求方式POST/GET和路径信息)
 # @get('/path') @post('/path')
 # 被装饰器修饰的函数func，调用为 get(path)(func)
 
@@ -102,15 +103,16 @@ def has_request_args_last(fn):
     return flag
 
 
-# 提取URL处理函数的特征，与request中获取的参数进行比较，分发处理。
+# 根据request不同的请求方式，抽取请求参数key value put到kw=dict()中，根据URL处理函数所需要的参数与kw进行比较，如果出现
+# 必要参数缺失则抛出异常。将封装好的参数集合**kw传入到URL处理函数中进行调用。
 class RequestHandler(object):
     def __init__(self, app, fn):
         self.__app = app
         self.__fn = fn
-        self.__named_kwargs_without_default = get_named_kwargs_without_default(fn) # tuple
-        self.__named_kwargs = get_named_kwargs(fn) # tuple
+        self.__named_kwargs_without_default = get_named_kwargs_without_default(fn)  # tuple
+        self.__named_kwargs = get_named_kwargs(fn)  # tuple
         self.__has_named_kwargs = has_named_kwargs(fn)
-        self.__has_kwargs = has_kwargs(fn) # 有没有关键字参数
+        self.__has_kwargs = has_kwargs(fn)  # 有没有关键字参数
         self.__has_request_args_last = has_request_args_last(fn)
 
     @asyncio.coroutine
@@ -169,4 +171,16 @@ class RequestHandler(object):
             return dict(error=e.error, data=e.data, message=e.message)
 
 
+# 注册URL处理函数
+def add_route(app, fn):
+    method = getattr(fn, '__method__', None)
+    path = getattr(fn, '__route__', None)
+    if path is None or method is None:
+        raise ValueError('@get or @post not defined in %s.' % str(fn))
+    if not asyncio.iscoroutinefunction(fn) or inspect.isgeneratorfunction(fn):  # 如果方法还不是协程
+        fn = asyncio.coroutine(fn)
+    logging.info(
+        'add route method -> %s path -> %s => %s(%s)' %
+        (method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
+    app.router.add_route(method, path, RequestHandler(app, fn))
 
