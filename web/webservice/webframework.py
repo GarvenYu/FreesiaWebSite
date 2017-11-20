@@ -7,6 +7,7 @@ import inspect, asyncio
 from aiohttp import web
 from urllib import parse
 from web.webservice.apierror import APIError
+import os
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -205,4 +206,7 @@ def add_routes(app, module_name):
 
 # 添加静态资源
 def add_static(app):
-    pass
+    # os.path.abspath('.') = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(os.path.dirname(os.path.abspath('.')), 'static')  # G:\python_web_site\web\static
+    app.router.add_static('/static/', path)
+    logging.info('add static %s => %s' % ('/static/', path))
