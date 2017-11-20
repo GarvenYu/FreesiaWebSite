@@ -210,3 +210,18 @@ def add_static(app):
     path = os.path.join(os.path.dirname(os.path.abspath('.')), 'static')  # G:\python_web_site\web\static
     app.router.add_static('/static/', path)
     logging.info('add static %s => %s' % ('/static/', path))
+
+
+# 添加日志middleware
+@web.middleware
+async def logger_middleware(request, handler):
+    resp = await handler(request)
+    # 处理逻辑
+    logging.info('request method is %s , path is %s'%(request.method, request.path))
+    return resp
+
+
+# 返回response的middleware
+@web.middleware
+async def response_middleware(request, handler):
+    pass

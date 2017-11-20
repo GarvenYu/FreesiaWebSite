@@ -23,9 +23,9 @@ def hello_query_string(request):
 @asyncio.coroutine
 def init(loop_param):
     app = web.Application(loop=loop_param)
-    app.router.add_route('GET', '/', index)
-    app.router.add_route('GET', '/hello/{name}', hello)
-    app.router.add_route('GET', '/hello2', hello_query_string)
+    app.router.add_get('/', index, name='route')
+    app.router.add_get('/hello/{name}', hello)
+    app.router.add_get('/hello2', hello_query_string)
     srv = yield from loop.create_server(app.make_handler(), '127.0.0.1', 9000)
     logging.info('server started at http://127.0.0.1:9000...')
     return srv
