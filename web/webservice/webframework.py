@@ -8,6 +8,7 @@ from aiohttp import web
 from urllib import parse
 from web.webservice.apierror import APIError
 import os
+from jinja2 import Environment, FileSystemLoader
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -217,7 +218,7 @@ def add_static(app):
 async def logger_middleware(request, handler):
     resp = await handler(request)
     # 处理逻辑
-    logging.info('request method is %s , path is %s'%(request.method, request.path))
+    logging.info('request method is %s , path is %s' % (request.method, request.path))
     return resp
 
 
@@ -237,4 +238,35 @@ async def response_middleware(request, handler):
         resp_final = web.Response(body=resp.encode('utf-8'), content_type='text/html', charset='UTF-8')
         return resp_final
     if isinstance(resp, dict):
-        pass
+        return web.json_response(resp)
+    if isinstance(resp, int) and 600 > resp >= 100:
+        return web.Response(resp)
+    if isinstance(resp, tuple) and len(resp) == 2:
+        t, m = resp
+        if isinstance(t, int) and 600 > t >= 100:
+            return web.Response(t, str(m))
+    # default:
+    resp_final = web.Response(body=str(resp).encode('utf-8'), content_type='text/plain', charset='utf-8')
+    return resp_final
+
+
+def init_jinja2(app, **kw):
+    logging.info('init jinja2...')
+    options = dict(
+        autoescape=kw.get('autoescape', True),
+        block_start_string=kw.get('block_start_string', '{%'),
+        block_end_string=kw.get('block_end_string', '%}'),
+        variable_start_string=kw.get('variable_start_string', '{{'),
+        variable_end_string=kw.get('variable_end_string', '}}'),
+        auto_reload=kw.get('auto_reload', True)
+    )
+    path = kw.get('path', None)
+    if path is None:
+        path = os.path.join(os.path.dirname(os.path.abspath('.')), 'templates')
+    logging.info('set jinja2 template path: %s' % path)
+    env = Environment(loader=FileSystemLoader(path), **options)
+    filters = kw.get('filters', None)
+    if filters is not None:
+        for name, f in filters.items():
+            env.filters[name] = f
+    app['__templating__'] = env

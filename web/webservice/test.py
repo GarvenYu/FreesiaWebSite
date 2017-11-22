@@ -8,6 +8,10 @@ def func(name, job='engineer', *, city):
     print("name -> %s, city -> %s, job -> %s" % (name, city, job))
 
 
+def func2(**kw):
+    print(kw.items())
+
+
 def add_static():
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
     logging.info(os.path.abspath('.'))  # G:\python_web_site\web\webservice
@@ -27,4 +31,5 @@ if __name__ == '__main__':
     # dict3 = dict(**dict1)
     # print(str(dict2)+str(dict3))
     # print('d2 -> %s' % d2)
-    add_static()
+    # add_static()
+    func2(name='yyy', age=12)
