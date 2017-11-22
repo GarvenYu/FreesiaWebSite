@@ -224,4 +224,17 @@ async def logger_middleware(request, handler):
 # 返回response的middleware
 @web.middleware
 async def response_middleware(request, handler):
-    pass
+    logging.info('Response Handler...')
+    resp = await handler(request)
+    if isinstance(resp, web.StreamResponse):
+        return resp
+    if isinstance(resp, bytes):
+        resp_final = web.Response(body=resp, content_type='application/octet-stream')
+        return resp_final
+    if isinstance(resp, str):
+        if resp.startswith('redirect:'):
+            return web.HTTPFound(resp[9:])
+        resp_final = web.Response(body=resp.encode('utf-8'), content_type='text/html', charset='UTF-8')
+        return resp_final
+    if isinstance(resp, dict):
+        pass
