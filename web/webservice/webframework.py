@@ -3,7 +3,7 @@
 
 
 import functools
-import inspect, asyncio
+import inspect, asyncio, json
 from aiohttp import web
 from urllib import parse
 from web.webservice.apierror import APIError
@@ -223,31 +223,45 @@ async def logger_middleware(request, handler):
 
 
 # 返回response的middleware
-@web.middleware
-async def response_middleware(request, handler):
-    logging.info('Response Handler...')
-    resp = await handler(request)
-    if isinstance(resp, web.StreamResponse):
-        return resp
-    if isinstance(resp, bytes):
-        resp_final = web.Response(body=resp, content_type='application/octet-stream')
+
+async def response_middleware(app, handler):
+    async def response(request):
+        logging.info('Response Handler...')
+        resp = await handler(request)
+        if isinstance(resp, web.StreamResponse):
+            return resp
+        if isinstance(resp, bytes):
+            resp_final = web.Response(body=resp, content_type='application/octet-stream')
+            return resp_final
+        if isinstance(resp, str):
+            if resp.startswith('redirect:'):
+                return web.HTTPFound(resp[9:])
+            resp_final = web.Response(body=resp.encode('utf-8'), content_type='text/html', charset='UTF-8')
+            return resp_final
+        if isinstance(resp, dict):
+            template_page = resp.get('__template__')
+            if template_page is None:
+                resp_final = web.Response(
+                    body=json.dumps(resp, ensure_ascii=False, default=lambda obj: obj.__dict__).encode('utf-8'))
+                resp_final.content_type = 'application/json'
+                resp_final.charset = 'utf-8'
+                return resp_final
+            else:
+                resp_final = web.Response(
+                    body=app['__template__'].get_template(template_page).render(**resp).encode('utf-8'))
+                resp_final.content_type = 'text/html'
+                resp_final.charset = 'utf-8'
+                return resp_final
+        if isinstance(resp, int) and 600 > resp >= 100:
+            return web.Response(resp)
+        if isinstance(resp, tuple) and len(resp) == 2:
+            t, m = resp
+            if isinstance(t, int) and 600 > t >= 100:
+                return web.Response(t, str(m))
+        # default:
+        resp_final = web.Response(body=str(resp).encode('utf-8'), content_type='text/plain', charset='utf-8')
         return resp_final
-    if isinstance(resp, str):
-        if resp.startswith('redirect:'):
-            return web.HTTPFound(resp[9:])
-        resp_final = web.Response(body=resp.encode('utf-8'), content_type='text/html', charset='UTF-8')
-        return resp_final
-    if isinstance(resp, dict):
-        return web.json_response(resp)
-    if isinstance(resp, int) and 600 > resp >= 100:
-        return web.Response(resp)
-    if isinstance(resp, tuple) and len(resp) == 2:
-        t, m = resp
-        if isinstance(t, int) and 600 > t >= 100:
-            return web.Response(t, str(m))
-    # default:
-    resp_final = web.Response(body=str(resp).encode('utf-8'), content_type='text/plain', charset='utf-8')
-    return resp_final
+    return response
 
 
 def init_jinja2(app, **kw):
@@ -269,4 +283,4 @@ def init_jinja2(app, **kw):
     if filters is not None:
         for name, f in filters.items():
             env.filters[name] = f
-    app['__templating__'] = env
+    app['__template__'] = env
