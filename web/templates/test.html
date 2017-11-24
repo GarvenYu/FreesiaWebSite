@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index Freesia Website</title>
+</head>
+<body>
+    <h1>当前用户</h1>
+    {% for u in users %}
+    <p>{{ u.name }}/{{ u.email }}</p>
+    {% endfor %}
+</body>
+</html>
