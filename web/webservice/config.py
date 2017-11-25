@@ -3,14 +3,17 @@
 
 
 from web.webservice import config_default, config_override
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 def merge(default_config, override_config):
-    '''
-    :param default_config: 默认配置信息
-    :param override_config: 生产配置信息
-    :return: 合并后的信息
-    '''
+    """
+    merge config_default.py and config_override.py
+    :param default_config:
+    :param override_config:
+    :return: dict
+    """
     final_config = {}
     if isinstance(default_config, dict) and isinstance(override_config, dict):
         for key, value in default_config.items():
@@ -28,5 +31,5 @@ def merge(default_config, override_config):
 
 try:
     config = merge(config_default.configs, config_override.configs)
-except ValueError:
-    pass
+except ValueError as e:
+    logging.info(str(e))

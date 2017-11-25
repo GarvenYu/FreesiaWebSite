@@ -92,18 +92,12 @@ class Model(dict, metaclass=ModelMetaclass):
             return field_value.default
         return value
 
-    # 通过cls参数传递当前类对象
-    @classmethod
-    @asyncio.coroutine
-    def find_one_user(cls, args):
-        rs = yield from select("%s where %s = ?" % (cls.__select__, cls.__primary_key__), (args), 1)
-        if len(rs) == 0:
-            return None
-        else:
-            return cls(**rs[0])
-
     @asyncio.coroutine
     def save_one_user(self):
+        """
+        保存用户
+        :return: None
+        """
         logging.info("fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
         args = list(map(self.get_value_or_default, self.__fields__))
         args.append(self.get_value_or_default(self.__primary_key__))
@@ -111,6 +105,64 @@ class Model(dict, metaclass=ModelMetaclass):
         if rows != 1:
             logging.warning('failed to insert record: affected rows: %s' % rows)
 
+    @classmethod
+    @asyncio.coroutine
+    def find_one_user(cls, args):
+        """
+        根据主键获取某一用户
+        :param args: cls:传递当前类对象; args:where 条件参数tuple
+        :return:
+        """
+        rs = yield from select("%s where %s = ?" % (cls.__select__, cls.__primary_key__), (args), 1)
+        if len(rs) == 0:
+            return None
+        else:
+            return cls(**rs[0])
+
+    @classmethod
+    @asyncio.coroutine
+    def find_all_user(cls, **kwargs):
+        """
+        **kw传入限制条件，检索符合条件的用户
+        :param kwargs:
+        {
+        'where':{'id':1, 'email':'qwe@qwe.com',...},
+        'orderBy':('id','email',...),
+        'limit': 5 / (5,10)
+        }
+        :return:[user]
+        """
+        logging.info('**kwargs -> %s' % str(kwargs))
+        args = []
+        subsql = []
+        if 'where' in kwargs:
+            subsql.append('where')
+            mount = len(kwargs.get('where'))
+            count = 0
+            for attr, value in kwargs.get('where').items():
+                subsql.append(attr + '=')
+                args.append(value)
+                count = count + 1
+                if count == mount:
+                    break
+                subsql.append('and')
+        if 'orderBy' in kwargs:
+            subsql.append('order by')  # where property1= .. and property2=... order by
+            args.extend(kwargs.get('orderBy'))
+        if 'limit' in kwargs:
+            subsql.append('limit')
+            if isinstance(kwargs.get('limit'), int):
+                subsql.append('?')
+                args.append(kwargs.get('limit'))
+            if isinstance(kwargs.get('limit'), tuple) and len(kwargs.get('limit')) == 2:
+                subsql.append('?,?')
+                args.extend(kwargs.get('limit'))
+            else:
+                raise ValueError('Invalid limit value: %s' % str(kwargs.get('limit')))
+        sql = cls.__select__ + ' ' + ' '.join(subsql)
+        logging.info('execute sql is %s' % sql)
+        rs = yield from select(sql, (args))
+        return [cls(**r) for r in rs]
 
 
 
