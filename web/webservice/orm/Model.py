@@ -46,7 +46,7 @@ def select(sql, args, size=None):
         else:
             rs = yield from cursor.fetchall()
         yield from cursor.close()
-        logging.info('rows returned: %s, result -> %s' % (len(rs), str(rs)))
+        logging.info('cursor closed, rows returned: %s, result -> %s' % (len(rs), str(rs)))
         return rs
 
 # 提供Model增删改接口
@@ -107,7 +107,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     @asyncio.coroutine
-    def find_one_user(cls, args):
+    def find_one_user_by_pk(cls, args):
         """
         根据主键获取某一用户
         :param args: cls:传递当前类对象; args:where 条件参数tuple
@@ -117,6 +117,7 @@ class Model(dict, metaclass=ModelMetaclass):
         if len(rs) == 0:
             return None
         else:
+            logging.info(str(rs))
             return cls(**rs[0])
 
     @classmethod
@@ -137,10 +138,10 @@ class Model(dict, metaclass=ModelMetaclass):
         subsql = []
         if 'where' in kwargs:
             subsql.append('where')
-            mount = len(kwargs.get('where'))
+            mount = len(kwargs.get('where'))  # where 条件个数
             count = 0
             for attr, value in kwargs.get('where').items():
-                subsql.append(attr + '=')
+                subsql.append(attr + '= ?')
                 args.append(value)
                 count = count + 1
                 if count == mount:
@@ -148,6 +149,13 @@ class Model(dict, metaclass=ModelMetaclass):
                 subsql.append('and')
         if 'orderBy' in kwargs:
             subsql.append('order by')  # where property1= .. and property2=... order by
+            mount = len(kwargs.get('orderBy'))
+            if mount == 1:
+                subsql.append('?')
+            else:
+                subsql.append('?')
+                for i in range(mount-1):
+                    subsql.append(',?')
             args.extend(kwargs.get('orderBy'))
         if 'limit' in kwargs:
             subsql.append('limit')
@@ -159,9 +167,12 @@ class Model(dict, metaclass=ModelMetaclass):
                 args.extend(kwargs.get('limit'))
             else:
                 raise ValueError('Invalid limit value: %s' % str(kwargs.get('limit')))
-        sql = cls.__select__ + ' ' + ' '.join(subsql)
+        if len(subsql) > 0:
+            sql = cls.__select__ + ' ' + ' '.join(subsql)
+        else:
+            sql = cls.__select__
         logging.info('execute sql is %s' % sql)
-        rs = yield from select(sql, (args))
+        rs = yield from select(sql, (args))  # 返回数据 list[dict1, dict2 ...]
         return [cls(**r) for r in rs]
 
 
