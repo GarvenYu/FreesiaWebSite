@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+__author__ = 'Freesia'
+
+"""
+package aiohttp, make webframework
+"""
 
 import functools
-import inspect, asyncio, json
+import inspect, asyncio, json, time, os
 from aiohttp import web
 from urllib import parse
 from web.webservice.apierror import APIError
-import os
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -217,8 +222,8 @@ def add_static(app):
 @web.middleware
 async def logger_middleware(request, handler):
     resp = await handler(request)
-    # 处理逻辑
-    logging.info('request method is %s , path is %s' % (request.method, request.path))
+    logging.info('Request: %s %s' % (request.method, request.path))
+    # await asyncio.sleep(0.3)
     return resp
 
 
@@ -239,6 +244,7 @@ async def response_middleware(app, handler):
             resp_final = web.Response(body=resp.encode('utf-8'), content_type='text/html', charset='UTF-8')
             return resp_final
         if isinstance(resp, dict):
+            logging.info('function is visited -> '+response.__name__+'->'+str(resp))
             template_page = resp.get('__template__')
             if template_page is None:
                 resp_final = web.Response(
@@ -284,3 +290,17 @@ def init_jinja2(app, **kw):
         for name, f in filters.items():
             env.filters[name] = f
     app['__template__'] = env
+
+
+def datetime_filter(t):
+    delta = int(time.time() - t)
+    if delta < 60:
+        return u'1分钟前'
+    if delta < 3600:
+        return u'%s分钟前' % (delta // 60)
+    if delta < 86400:
+        return u'%s小时前' % (delta // 3600)
+    if delta < 604800:
+        return u'%s天前' % (delta // 86400)
+    dt = datetime.fromtimestamp(t)
+    return u'%s年%s月%s日' % (dt.year, dt.month, dt.day)

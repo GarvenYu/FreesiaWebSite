@@ -3,9 +3,14 @@
 
 
 from web.webservice.webframework import get, post
+from web.webservice.orm.WebSiteModel import User
 import asyncio
 
 
-@get('/')
+@get('/main')
 async def index(request):
-    pass
+    users = await User.find_all_user()
+    return {
+        '__template__': 'test.html',
+        'users': users
+    }
