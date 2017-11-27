@@ -222,6 +222,7 @@ def add_static(app):
 @web.middleware
 async def logger_middleware(request, handler):
     resp = await handler(request)
+    logging.info('logger_middleware'+str(resp))
     logging.info('Request: %s %s' % (request.method, request.path))
     # await asyncio.sleep(0.3)
     return resp
@@ -244,7 +245,7 @@ async def response_middleware(app, handler):
             resp_final = web.Response(body=resp.encode('utf-8'), content_type='text/html', charset='UTF-8')
             return resp_final
         if isinstance(resp, dict):
-            logging.info('function is visited -> '+response.__name__+'->'+str(resp))
+            logging.info('response_middleware() resp -> '+str(resp))
             template_page = resp.get('__template__')
             if template_page is None:
                 resp_final = web.Response(

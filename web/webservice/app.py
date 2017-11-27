@@ -37,7 +37,7 @@ import logging
 
 async def init(loop_param):
     await create_pool(loop, user='root', password='123456', database='freesiawebsite')
-    app = web.Application(loop=loop_param, middlewares=[logger_middleware, response_middleware])
+    app = web.Application(loop=loop_param, middlewares=[response_middleware, logger_middleware])
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app, 'handler')
     # app.router.add_get('/', index)
