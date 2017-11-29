@@ -143,6 +143,7 @@ class RequestHandler(object):
                     return web.HTTPBadRequest(reason='Unsupported Content-Type: %s' % request.content_type)
             if request.method == 'GET':  # GET请求直接从URL里取参数
                 qs = request.query_string  # The query string in the URL, e.g., id=10.Read-only str property.
+                logging.info('query_string is %s' % qs)
                 if qs:
                     kw = dict()
                     for key, value in parse.parse_qs(qs, keep_blank_values=True).items():
@@ -158,7 +159,7 @@ class RequestHandler(object):
                 for key, value in kw.items():
                     if key in self.__named_kwargs:
                         copy[key] = kw[key]
-                    kw = copy
+                kw = copy
                 # 检查命名关键字参数的参数名是否和match_info中的参数名重复
             for key, value in request.match_info.items():
                 if key in kw:

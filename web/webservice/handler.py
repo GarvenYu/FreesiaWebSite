@@ -8,7 +8,7 @@ import time
 
 
 @get('/main')
-async def index(request):
+async def index():
     users = await User.find_all_user()
     return {
         '__template__': 'blog_list.html',
@@ -17,7 +17,7 @@ async def index(request):
 
 
 @get('/bloglist')
-async def get_blog_list(request):
+async def get_blog_list():
     summary = 'catch me if you can'
     blogs = [
         Blog(id='1', name='Test Blog', summary=summary, created_at=time.time() - 120),
@@ -30,3 +30,9 @@ async def get_blog_list(request):
         '__template__': 'blog_list.html',
         'blogs': blogs
     }
+
+
+@get('/api/users')
+async def get_users():
+    users = await User.find_all_user(orderBy=('created_at',))
+    return dict(users=users)  # [user1, user2, ...]

@@ -148,7 +148,7 @@ class Model(dict, metaclass=ModelMetaclass):
                     break
                 subsql.append('and')
         if 'orderBy' in kwargs:
-            subsql.append('order by')  # where property1= .. and property2=... order by
+            subsql.append('order by ')  # where property1= .. and property2=... order by
             mount = len(kwargs.get('orderBy'))
             if mount == 1:
                 subsql.append('?')
@@ -171,7 +171,6 @@ class Model(dict, metaclass=ModelMetaclass):
             sql = cls.__select__ + ' ' + ' '.join(subsql)
         else:
             sql = cls.__select__
-        logging.info('execute sql is %s' % sql)
         rs = yield from select(sql, (args))  # 返回数据 list[dict1, dict2 ...]
         return [cls(**r) for r in rs]
 
