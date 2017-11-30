@@ -16,7 +16,7 @@ async def index():
     }
 
 
-@get('/bloglist')
+@get('/blog/blogList')
 async def get_blog_list():
     summary = 'catch me if you can'
     blogs = [
@@ -30,6 +30,11 @@ async def get_blog_list():
         '__template__': 'blog_list.html',
         'blogs': blogs
     }
+
+
+@get('/blog/writeBlog')
+def write_blog():
+    return dict(__template__='write_blog.html', id='', action='/api/saveBlog')
 
 
 @get('/api/users')

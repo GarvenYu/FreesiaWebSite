@@ -6,17 +6,18 @@
     <link rel="stylesheet" href="/static/css/uikit.gradient.css">
     <!--<link rel="stylesheet" href="/static/css/uikit.css">-->
     <script src="/static/js/jquery-3.2.1.js"></script>
+    <script src="/static/js/vue.js"></script>
     <script src="/static/js/uikit.js"></script>
     {% block beforehead %}<!-- before head  -->{% endblock %}
 </head>
 <body>
 <nav class="uk-navbar uk-navbar-attached uk-margin-bottom">
         <div class="uk-container uk-container-center">
-            <a href="/" class="uk-navbar-brand">Freesia</a>
+            <a href="/main" class="uk-navbar-brand">Freesia</a>
             <ul class="uk-navbar-nav">
-                <li data-url="blogs"><a href=""><i class="uk-icon-home"></i>主页</a></li>
+                <li data-url="blogs"><a href="/main"><i class="uk-icon-home"></i>主页</a></li>
                 <li><a target="_blank" href=""><i class="uk-icon-book"></i>技术日志</a></li>
-                <li><a target="_blank" href=""><i class="uk-icon-edit"></i>心情</a></li>
+                <li><a target="_blank" href=""><i class="uk-icon-tag"></i>心情</a></li>
             </ul>
             <div class="uk-navbar-flip">
                 <ul class="uk-navbar-nav">
@@ -30,8 +31,9 @@
                         </div>
                     </li>
                 {% else %}
-                    <li><a href="/signin"><i class="uk-icon-sign-in"></i> 登陆</a></li>
-                    <li><a href="/register"><i class="uk-icon-user-plus"></i> 注册</a></li>
+                    <li><a href="/signin"><i class="uk-icon-sign-in"></i>登陆</a></li>
+                    <li><a href="/register"><i class="uk-icon-user-plus"></i>注册</a></li>
+                    <li><a href="/blog/writeBlog"><i class="uk-icon-edit"></i>写博客</a></li>
                 {% endif %}
                 </ul>
             </div>
@@ -52,7 +54,7 @@
             <div class="uk-panel uk-margin-top uk-margin-bottom">
                 <p>
                     <a target="_blank" href="" class="uk-icon-button uk-icon-weibo"></a>
-                    <a target="_blank" href="" class="uk-icon-button uk-icon-github"></a>
+                    <a target="_blank" href="https://github.com/GarvenYu/" class="uk-icon-button uk-icon-github"></a>
                     <a target="_blank" href="" class="uk-icon-button uk-icon-linkedin-square"></a>
                     <a target="_blank" href="" class="uk-icon-button uk-icon-twitter"></a>
                 </p>
