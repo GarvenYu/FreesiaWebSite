@@ -4,6 +4,7 @@
 
 from web.webservice.webframework import get, post
 from web.webservice.orm.WebSiteModel import User, Blog
+from web.webservice.apierror import APIValueError,APIPermissionError,APIResourceNotFoundError
 import time
 
 
@@ -41,3 +42,15 @@ def write_blog():
 async def get_users():
     users = await User.find_all_user(orderBy=('created_at',))
     return dict(users=users)  # [user1, user2, ...]
+
+
+@post('/api/saveBlog')
+def save_blog(request, *, title, summary, content):
+    # 检查是否是管理员身份 后续更新
+    if title is None or title.strip() is None:
+        raise APIValueError('title field', 'blog title can`t be None.')
+    if summary is None or summary.strip() is None:
+        raise APIValueError('summary field', 'blog summary can`t be None.')
+    if content is None or content.strip() is None:
+        raise APIValueError('content field', 'blog content can`t be None.')
+    pass
