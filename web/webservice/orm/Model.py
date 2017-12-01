@@ -98,7 +98,7 @@ class Model(dict, metaclass=ModelMetaclass):
         保存用户
         :return: None
         """
-        logging.info("fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
+        logging.info("method -> save_one_user() ,fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
         args = list(map(self.get_value_or_default, self.__fields__))
         args.append(self.get_value_or_default(self.__primary_key__))
         rows = yield from execute(self.__insert__, args)
@@ -174,6 +174,18 @@ class Model(dict, metaclass=ModelMetaclass):
         rs = yield from select(sql, (args))  # 返回数据 list[dict1, dict2 ...]
         return [cls(**r) for r in rs]
 
+    @asyncio.coroutine
+    def save_one_blog(self):
+        """
+        保存博客
+        :return: None
+        """
+        logging.info("method -> save_one_blog() ,fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
+        args = list(map(self.get_value_or_default, self.__fields__))
+        args.append(self.get_value_or_default(self.__primary_key__))
+        rows = yield from execute(self.__insert__, args)
+        if rows != 1:
+            logging.warning('failed to insert record: affected rows: %s' % rows)
 
 
 
