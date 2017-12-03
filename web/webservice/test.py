@@ -23,6 +23,7 @@ def add_static():
 
 if __name__ == '__main__':
     # d = {'name': 'ykb', 'city': 'yt', 'job': 'doctor'}
+    # print(d.get('ssss'))
     # d2 = dict(name='rtry', age=123)
     # func(**d)
     # func('qwe', city='yt')

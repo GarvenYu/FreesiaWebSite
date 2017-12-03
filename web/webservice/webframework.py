@@ -137,7 +137,7 @@ class RequestHandler(object):
                         return web.HTTPBadRequest(reason='JSON body must be object.')
                     kw = params
                 elif con_typ.startswith('application/x-www-form-urlencoded') or con_typ.startswith('multipart/form-data'):
-                    params = request.post()  # Returns MultiDictProxy instance filled with parsed data.
+                    params = yield from request.post()  # Returns MultiDictProxy instance filled with parsed data.
                     kw = dict(**params)
                 else:
                     return web.HTTPBadRequest(reason='Unsupported Content-Type: %s' % request.content_type)

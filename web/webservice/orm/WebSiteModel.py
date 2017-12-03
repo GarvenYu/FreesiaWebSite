@@ -29,23 +29,23 @@ class User(Model):
 class Blog(Model):
     __table__ = 'blogs'
 
-    id = StringField(column_type='varchar(50)', primary_key=True, default=next_id)
+    id = StringField(column_type='varchar(50)', primary_key=True, default=next_id())
     user_id = StringField(column_type='varchar(50)')
     user_name = StringField(column_type='varchar(50)')
     user_image = StringField(column_type='varchar(500)')
     title = StringField(column_type='varchar(50)')
     summary = StringField(column_type='varchar(200)')
     content = TextField()
-    created_at = FloatField(default=time.time)
+    created_at = FloatField(default=time.time())
 
 
 class Comment(Model):
     __table__ = 'comments'
 
-    id = StringField(column_type='varchar(50)', primary_key=True, default=next_id)
+    id = StringField(column_type='varchar(50)', primary_key=True, default=next_id())
     blog_id = StringField(column_type='varchar(50)')
     user_id = StringField(column_type='varchar(50)')
     user_name = StringField(column_type='varchar(50)')
     user_image = StringField(column_type='varchar(500)')
     content = TextField()
-    created_at = FloatField(default=time.time)
+    created_at = FloatField(default=time.time())

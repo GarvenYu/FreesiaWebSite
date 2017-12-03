@@ -10,10 +10,10 @@ import time
 
 @get('/main')
 async def index():
-    users = await User.find_all_user()
+    # users = await User.find_all_user()
     return {
-        '__template__': 'blog_list.html',
-        'users': users
+        '__template__': 'blog_list.html'
+        # 'users': users
     }
 
 
@@ -53,4 +53,7 @@ def save_blog(request, *, title, summary, content):
         raise APIValueError('summary field', 'blog summary can`t be None.')
     if content is None or content.strip() is None:
         raise APIValueError('content field', 'blog content can`t be None.')
-    pass
+    blog = Blog(id=None, user_id='001510478227665db0b9bb1767b4aacb66239ff8e2ad1c6000', user_name='Test',
+                user_image='about:blank', title=title, summary=summary, content=content, created_at=None)
+    yield from blog.save_one_blog()
+    return blog
