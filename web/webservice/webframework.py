@@ -132,8 +132,9 @@ class RequestHandler(object):
                     return web.HTTPBadRequest(reason='Missing Content Type')
                 con_typ = request.content_type.lower()
                 if con_typ.startswith('application/json'):
-                    params = request.json()  # json数据转为dict格式
-                    if not isinstance(dict, params):
+                    params = yield from request.json()  # json数据转为dict格式
+                    logging.info('params is %s' % params)
+                    if not isinstance(params, dict):
                         return web.HTTPBadRequest(reason='JSON body must be object.')
                     kw = params
                 elif con_typ.startswith('application/x-www-form-urlencoded') or con_typ.startswith('multipart/form-data'):

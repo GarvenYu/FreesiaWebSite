@@ -6,6 +6,8 @@ from web.webservice.webframework import get, post
 from web.webservice.orm.WebSiteModel import User, Blog
 from web.webservice.apierror import APIValueError,APIPermissionError,APIResourceNotFoundError
 import time
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 @get('/main')
