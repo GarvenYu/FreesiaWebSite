@@ -187,6 +187,21 @@ class Model(dict, metaclass=ModelMetaclass):
         if rows != 1:
             logging.warning('failed to insert record: affected rows: %s' % rows)
 
+    @classmethod
+    @asyncio.coroutine
+    def find_blog(cls, args):
+        """
+        根据主键找到博客
+        :param args: cls:传递当前类对象; args:where 条件参数tuple
+        :return:
+        """
+        rs = yield from select("%s where %s = ?" % (cls.__select__, cls.__primary_key__), (args), 1)
+        if len(rs) == 0:
+            return None
+        else:
+            logging.info(str(rs))
+            return cls(**rs[0])
+
 
 
 

@@ -59,3 +59,9 @@ def save_blog(request, *, title, summary, content):
                 user_image='about:blank', title=title, summary=summary, content=content, created_at=None)
     yield from blog.save_one_blog()
     return blog
+
+
+@get('/api/blogs/{id}')
+def find_blog(**kw):
+    blog = yield from Blog.find_blog(kw.get('id'))
+    return blog
