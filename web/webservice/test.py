@@ -1,5 +1,6 @@
 # -*-coding:utf-8-*-
 import os
+from web.webservice.orm.WebSiteModel import User
 import logging
 logging.basicConfig(level=logging.INFO)
 
