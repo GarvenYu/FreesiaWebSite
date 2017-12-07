@@ -69,9 +69,23 @@ def find_blog(**kw):
     return blog
 
 
+@get('/register')
+def register():
+    return {
+        '__template__': 'register.html'
+    }
+
+
+@get('/login')
+def login():
+    return {
+        '__template__': 'login.html'
+    }
+
+
 _REGEX_EMAIL = re.compile(r'^[0-9a-zA-Z.]+@[0-9a-zA-Z.]+\w+$')
 _REGEX_PASSWORD = re.compile(r'^[0-9a-zA-Z]{8,15}$')
-_COOKIE_KEY = configs.session.secret
+_COOKIE_KEY = configs.get('session').get('secret')
 COOKIE_NAME = 'Freesia'
 
 
@@ -86,7 +100,7 @@ def register_user(*, email, name, passwd):
     # 检查是否已注册
     user = yield from get_users(where={'email': email})
     if len(user) > 0:
-        raise APIValueError('email', '邮箱已被注册。')
+        raise APIValueError('email', '邮箱已被注册.')
     # sha1加密密码
     sha1_passwd = '%s:%s' % (email, passwd)
     user = User(id=None, name=name.strip(), email=email, passwd=hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest(),
@@ -110,3 +124,27 @@ def user2cookie(user, max_age):
     # "用户id" + "过期时间" + SHA1("用户id" + "用户口令" + "过期时间" + "SecretKey")
     ls = [user.id, expires, hashlib.sha1(s.encode('utf-8')).hexdigest()]
     return '-'.join(ls)
+
+
+@post('/user/login')
+def user_login(*, email, passwd):
+    if not email:
+        raise APIValueError('email field', '邮箱错误.')
+    if not passwd:
+        raise APIValueError('passwd field', '密码错误.')
+    user = yield from User.find_one_user_by_email(email)
+    if user is None:
+        raise APIValueError('email', '邮箱错误.')
+    sha1 = hashlib.sha1()
+    sha1.update(email.encode('utf-8'))
+    sha1.update(b':')  # 字节形式的字符串,相当于':'.encode('utf-8')
+    sha1.update(passwd.encode('utf-8'))
+    if user.get('passwd') != sha1.hexdigest():
+        raise APIValueError('passwd', '密码错误.')
+    # 验证无误,设置cookie
+    r = web.Response()
+    r.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)
+    user.passwd = '******'
+    r.content_type = 'application/json'
+    r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
+    return r

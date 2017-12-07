@@ -16,7 +16,7 @@ def test(loop):
     # yield from u.save_one_user()
     # kw = {'where': {'id': '001510475160004d059c367f9bf4f9fb53042625e040ff7000', 'email': 'test@example.com'}}
     kw = {'orderBy': ('created_at',)}
-    user = yield from User.find_all_user(**kw)
+    user = yield from User.find_one_user_by_email('123@qq.com')
     print(str(user))
     yield from destroy_pool()
 

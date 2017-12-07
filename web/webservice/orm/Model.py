@@ -107,13 +107,13 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     @asyncio.coroutine
-    def find_one_user_by_pk(cls, args):
+    def find_one_user_by_email(cls, args):
         """
-        根据主键获取某一用户
+        根据邮箱获取某一用户
         :param args: cls:传递当前类对象; args:where 条件参数tuple
         :return:
         """
-        rs = yield from select("%s where %s = ?" % (cls.__select__, cls.__primary_key__), (args), 1)
+        rs = yield from select("%s where %s = ?" % (cls.__select__, 'email'), (args), 1)
         if len(rs) == 0:
             return None
         else:
