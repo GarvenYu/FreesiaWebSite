@@ -37,9 +37,28 @@ async def get_blog_list():
     }
 
 
-@get('/blog/writeBlog')
+@get('/manage/blog/writeBlog')
 def write_blog():
     return dict(__template__='write_blog.html', id='', action='/api/saveBlog')
+
+
+def get_page_index(page_str):
+    p = 1
+    try:
+        p = int(page_str)
+    except ValueError as e:
+        pass
+    if p < 1:
+        p = 1
+    return p
+
+
+@get('/manage/blogs')
+def manage_blogs(*, page='1'):
+    return {
+        '__template__': 'manage_blog.html',
+        'page_index': get_page_index(page)
+    }
 
 
 @get('/api/users')
