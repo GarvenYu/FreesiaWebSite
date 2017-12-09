@@ -83,22 +83,22 @@ def login():
     }
 
 
-_REGEX_EMAIL = re.compile(r'^[0-9a-zA-Z.]+@[0-9a-zA-Z.]+\w+$')
-_REGEX_PASSWORD = re.compile(r'^[0-9a-zA-Z]{8,15}$')
+# _REGEX_EMAIL = re.compile(r'^[0-9a-zA-Z.]+@[0-9a-zA-Z.]+\w+$')
+# _REGEX_PASSWORD = re.compile(r'^[0-9a-zA-Z]{8,15}$')
 _COOKIE_KEY = configs.get('session').get('secret')
 COOKIE_NAME = 'Freesia'
 
 
 @post('/user/register')
 def register_user(*, email, name, passwd):
-    if _REGEX_EMAIL.match(email) is None or email.strip() == '':
+    if email.strip() == '':
         raise APIValueError('email field', '邮箱格式不正确.')
     if name is None or name.strip() == '':
         raise APIValueError('name field', '用户名不能为空.')
-    if _REGEX_PASSWORD.match(passwd) is None or passwd.strip() == '':
+    if passwd.strip() == '':
         raise APIValueError('passwd field', '密码格式不正确.')
     # 检查是否已注册
-    user = yield from get_users(where={'email': email})
+    user = yield from User.find_all_user(where={'email': email})
     if len(user) > 0:
         raise APIValueError('email', '邮箱已被注册.')
     # sha1加密密码
@@ -142,9 +142,30 @@ def user_login(*, email, passwd):
     if user.get('passwd') != sha1.hexdigest():
         raise APIValueError('passwd', '密码错误.')
     # 验证无误,设置cookie
-    r = web.Response()
-    r.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)
+    resp = web.Response()
+    resp.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)
     user.passwd = '******'
-    r.content_type = 'application/json'
-    r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
-    return r
+    resp.content_type = 'application/json'
+    resp.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
+    return resp
+
+
+async def cookie2user(cookie_str):
+    if not cookie_str:
+        return None
+    try:
+        ls = cookie_str.split('-')
+        user_id, expires, sha1 = ls
+        if int(expires) < time.time():  # 验证expires,cookie有效时间是否过期
+            return None
+        user = await User.find_all_user(where={'id': user_id})
+        if user is None:  # 验证user_id
+            return None
+        s = '%s-%s-%s-%s' % (user.id, user.passwd, expires, _COOKIE_KEY)
+        if sha1 != hashlib.sha1(s.encode('utf-8')).hexdigest():  # 验证sha1
+            return None
+        user.passwd = '********'
+        return user  # 验证无误返回user对象
+    except Exception as e:
+        logging.exception(e)
+        return None
