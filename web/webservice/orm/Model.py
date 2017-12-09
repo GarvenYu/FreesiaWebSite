@@ -172,7 +172,10 @@ class Model(dict, metaclass=ModelMetaclass):
         else:
             sql = cls.__select__
         rs = yield from select(sql, (args))  # 返回数据 list[dict1, dict2 ...]
-        return [cls(**r) for r in rs]
+        if len(rs) > 1:
+            return [cls(**r) for r in rs]
+        else:
+            return cls(**rs[0])
 
     @asyncio.coroutine
     def save_one_blog(self):

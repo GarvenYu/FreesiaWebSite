@@ -68,8 +68,8 @@ async def cookie_middleware(request, handler):
         user = await cookie2user(cookie_str)
         if user:
             request.__user__ = user
-            logging.info('find valid user %s' % user.get('email'))
-            if request.path.startswith('') and (request.__user__ is None or not request.__user__.get('admin')):
+            logging.info('find valid user %s' % user.email)
+            if request.path.startswith('/manage') and (request.__user__ is None or not request.__user__.get('admin')):
                 return web.HTTPFound('/login')
     return await handler(request)
 

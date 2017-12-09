@@ -105,7 +105,7 @@ def register_user(*, email, name, passwd):
     sha1_passwd = '%s:%s' % (email, passwd)
     user = User(id=None, name=name.strip(), email=email, passwd=hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest(),
                 image='http://www.gravatar.com/avatar/%s?d=mm&s=120' % hashlib.md5(email.encode('utf-8')).hexdigest()
-                , admin=None)
+                , admin=None, created_at=None)
     yield from user.save_one_user()
     # 生成cookie:
     r = web.Response()
@@ -158,7 +158,7 @@ async def cookie2user(cookie_str):
         user_id, expires, sha1 = ls
         if int(expires) < time.time():  # 验证expires,cookie有效时间是否过期
             return None
-        user = await User.find_all_user(where={'id': user_id})
+        user = await User.find_all_user(where={'id': user_id})  # list形式
         if user is None:  # 验证user_id
             return None
         s = '%s-%s-%s-%s' % (user.id, user.passwd, expires, _COOKIE_KEY)
