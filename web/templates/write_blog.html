@@ -71,7 +71,7 @@ $(function () {
     </div>
 
     <div id="vm" class="uk-width-2-3">
-        <form @submit="submit" class="uk-form uk-form-stacked" enctype="application/x-www-form-urlencoded">
+        <form v-on="submit: submit" class="uk-form uk-form-stacked" enctype="application/x-www-form-urlencoded">
             <!--action="/api/saveBlog" method="post"-->
             <div class="uk-alert uk-alert-danger uk-hidden"></div>
             <div class="uk-form-row">

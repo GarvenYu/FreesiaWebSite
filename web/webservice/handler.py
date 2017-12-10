@@ -5,7 +5,7 @@
 from web.webservice.config_default import configs
 from aiohttp import web
 from web.webservice.webframework import get, post
-from web.webservice.orm.WebSiteModel import User, Blog
+from web.webservice.orm.WebSiteModel import User, Blog, Page
 from web.webservice.apierror import APIValueError,APIPermissionError,APIResourceNotFoundError
 import time, re, hashlib, json
 import logging
@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 
 @get('/main')
 async def index():
-    # users = await User.find_all_user()
+    # users = await User.find_all()
     return {
         '__template__': 'blog_list.html'
         # 'users': users
@@ -63,8 +63,24 @@ def manage_blogs(*, page='1'):
 
 @get('/api/users')
 async def get_users(**kwargs):
-    users = await User.find_all_user(kwargs)
+    users = await User.find_all(kwargs)
     return dict(users=users)  # [user1, user2, ...]
+
+
+@get('/api/blogs')
+async def get_blogs(*, page='1'):
+    """
+    获取所有日志
+    :param page:当前页数
+    :return:dict(page,当前page的blog)
+    """
+    page_index = get_page_index(page)
+    blog_num = await Blog.find_number('count(id)')
+    page = Page(blog_num, page_index)
+    if blog_num == 0:
+        return dict(page=page, blogs=())
+    blogs = await Blog.find_all(orderBy='created_at desc', limit=(page.offset, page.limit))
+    return dict(page=page, blogs=blogs)
 
 
 @post('/api/saveBlog')
@@ -117,7 +133,7 @@ def register_user(*, email, name, passwd):
     if passwd.strip() == '':
         raise APIValueError('passwd field', '密码格式不正确.')
     # 检查是否已注册
-    user = yield from User.find_all_user(where={'email': email})
+    user = yield from User.find_all('where email=?', [email])
     if len(user) > 0:
         raise APIValueError('email', '邮箱已被注册.')
     # sha1加密密码
@@ -177,7 +193,7 @@ async def cookie2user(cookie_str):
         user_id, expires, sha1 = ls
         if int(expires) < time.time():  # 验证expires,cookie有效时间是否过期
             return None
-        user = await User.find_all_user(where={'id': user_id})  # list形式
+        user = await User.find_all('where id = ?', [user_id])  # list形式
         if user is None:  # 验证user_id
             return None
         s = '%s-%s-%s-%s' % (user.id, user.passwd, expires, _COOKIE_KEY)

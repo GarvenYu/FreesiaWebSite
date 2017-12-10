@@ -111,7 +111,7 @@ class Model(dict, metaclass=ModelMetaclass):
         """
         根据邮箱获取某一用户
         :param args: cls:传递当前类对象; args:where 条件参数tuple
-        :return:
+        :return:user
         """
         rs = yield from select("%s where %s = ?" % (cls.__select__, 'email'), (args), 1)
         if len(rs) == 0:
@@ -122,60 +122,57 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     @asyncio.coroutine
-    def find_all_user(cls, **kwargs):
+    def find_all(cls, where=None, args=None, **kw):
         """
-        **kw传入限制条件，检索符合条件的用户
-        :param kwargs:
-        {
-        'where':{'id':1, 'email':'qwe@qwe.com',...},
-        'orderBy':('id','email',...),
-        'limit': 5 / (5,10)
-        }
-        :return:[user]
+        根据查询条件得到某一实体或全体实体
+        :param where: where子句,参数值用？代替
+        :param args: 参数
+        :param kw: {'orderBy':'', 'limit':''}
+        :return: user or user_list
         """
-        logging.info('**kwargs -> %s' % str(kwargs))
-        args = []
-        subsql = []
-        if 'where' in kwargs:
-            subsql.append('where')
-            mount = len(kwargs.get('where'))  # where 条件个数
-            count = 0
-            for attr, value in kwargs.get('where').items():
-                subsql.append(attr + '= ?')
-                args.append(value)
-                count = count + 1
-                if count == mount:
-                    break
-                subsql.append('and')
-        if 'orderBy' in kwargs:
-            subsql.append('order by ')  # where property1= .. and property2=... order by
-            mount = len(kwargs.get('orderBy'))
-            if mount == 1:
-                subsql.append('?')
+        sql = [cls.__select__]
+        if where:
+            sql.append(where)
+        if args is None:
+            args = []
+        orderBy = kw.get('orderBy', None)
+        if orderBy:
+            sql.append('order by')
+            sql.append(orderBy)
+        limit = kw.get('limit', None)
+        if limit is not None:
+            sql.append('limit')
+            if isinstance(limit, int):
+                sql.append('?')
+                args.append(limit)
+            elif isinstance(limit, tuple) and len(limit) == 2:
+                sql.append('?, ?')
+                args.extend(limit)
             else:
-                subsql.append('?')
-                for i in range(mount-1):
-                    subsql.append(',?')
-            args.extend(kwargs.get('orderBy'))
-        if 'limit' in kwargs:
-            subsql.append('limit')
-            if isinstance(kwargs.get('limit'), int):
-                subsql.append('?')
-                args.append(kwargs.get('limit'))
-            if isinstance(kwargs.get('limit'), tuple) and len(kwargs.get('limit')) == 2:
-                subsql.append('?,?')
-                args.extend(kwargs.get('limit'))
-            else:
-                raise ValueError('Invalid limit value: %s' % str(kwargs.get('limit')))
-        if len(subsql) > 0:
-            sql = cls.__select__ + ' ' + ' '.join(subsql)
-        else:
-            sql = cls.__select__
-        rs = yield from select(sql, (args))  # 返回数据 list[dict1, dict2 ...]
+                raise ValueError('Invalid limit value: %s' % str(limit))
+        rs = yield from select(' '.join(sql), args)
         if len(rs) > 1:
             return [cls(**r) for r in rs]
         else:
             return cls(**rs[0])
+
+    @classmethod
+    @asyncio.coroutine
+    def find_number(cls, select_field, where=None, args=None):
+        """
+
+        :param select_field: count(id) or else
+        :param where: 查询条件
+        :param args: 参数
+        :return: count(id) or else
+        """
+        sql = ['select %s as _num_ from %s' % (select_field, cls.__table__)]
+        if where:
+            sql.append(where)
+        rs = yield from select(' '.join(sql), args, 1)
+        if len(rs) == 0:
+            return None
+        return rs[0]['_num_']
 
     @asyncio.coroutine
     def save_one_blog(self):
