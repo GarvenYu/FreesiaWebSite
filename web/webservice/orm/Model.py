@@ -153,8 +153,10 @@ class Model(dict, metaclass=ModelMetaclass):
         rs = yield from select(' '.join(sql), args)
         if len(rs) > 1:
             return [cls(**r) for r in rs]
-        else:
+        elif len(rs) == 1:
             return cls(**rs[0])
+        else:
+            return []
 
     @classmethod
     @asyncio.coroutine
@@ -172,7 +174,7 @@ class Model(dict, metaclass=ModelMetaclass):
         rs = yield from select(' '.join(sql), args, 1)
         if len(rs) == 0:
             return None
-        return rs[0]['_num_']
+        return rs[0]['_num_']  # [{'_num_': int }]
 
     @asyncio.coroutine
     def save_one_blog(self):
