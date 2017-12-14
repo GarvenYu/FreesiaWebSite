@@ -3,26 +3,66 @@
 {% block title %}日志{% endblock %}
 
 {% block beforehead %}
-
 <script>
+function initVM(data) {
+    var vm = new Vue({
+        el: '#vm',
+        data: {
+            blogs: data.blogs,
+            page: data.page
+        },
+        methods: {
+            edit_blog: function (blog) {
+                location.assign('/manage/blogs/edit?id=' + blog.id);
+            },
+            delete_blog: function (blog) {
+                if (confirm('确认要删除“' + blog.name + '”？删除后不可恢复！')) {
+                    postJSON('/api/blogs/' + blog.id + '/delete', function (err, r) {
+                        if (err) {
+                            return alert(err.message || err.error || err);
+                        }
+                        refresh();
+                    });
+                }
+            }
+        }
+    });
+    $('#vm').show();
+}
+$(function() {
+    getJSON('/api/blogs', {
+        page: '{{ page_index }}'
+    }, function (err, results) {
+        if (err) {
+            return fatal(err);
+        }
+        $('#loading').hide();
+        initVM(results);
+    });
+});
 </script>
-
 {% endblock %}
 
 {% block content %}
 
-    <div class="uk-width-medium-3-4">
-    {% for blog in blogs %}
-        <article class="uk-article">
-            <h2><a href="/blog/{{ blog.id }}">{{ blog.name }}</a></h2>
-            <p class="uk-article-meta">发表于{{ blog.created_at|datetime }}</p>
-            <p>{{ blog.summary }}</p>
-            <p><a href="/blog/{{ blog.id }}">继续阅读 <i class="uk-icon-angle-double-right"></i></a></p>
-        </article>
-        <hr class="uk-article-divider">
-    {% endfor %}
-    </div>
+<div class="uk-width-medium-3-4">
 
+        <div id="vm" class="uk-width-1-1">
+
+            <ul v-repeat="blog: blogs" >
+                            <article class="uk-article">
+                            <h2><a v-attr="href:'/api/blogs/'+blog.id" v-text="blog.title"></a></h2>
+                            <p class="uk-article-meta" v-text="blog.created_at.toDateTime()"></p>
+                            <p v-text="blog.summary"></p>
+                            <p><a v-attr="href:'/api/blogs/'+blog.id">继续阅读 <i class="uk-icon-angle-double-right"></i></a></p>
+                        </article>
+                         <hr class="uk-article-divider">
+                    </ul>
+
+
+            <div v-component="pagination" v-with="page"></div>
+        </div>
+    </div>
     <div class="uk-width-medium-1-4">
         <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">友情链接</h3>
@@ -34,5 +74,4 @@
             </ul>
         </div>
     </div>
-
 {% endblock %}
