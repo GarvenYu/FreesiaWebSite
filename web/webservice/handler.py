@@ -105,7 +105,10 @@ def save_blog(*, title, summary, content):
 @get('/api/blogs/{id}')
 def find_blog(**kw):
     blog = yield from Blog.find_blog(kw.get('id'))
-    return blog
+    return {
+        '__template__': 'show_blog.html',
+        'blog': blog
+    }
 
 
 @get('/register')
@@ -119,6 +122,13 @@ def register():
 def login():
     return {
         '__template__': 'login.html'
+    }
+
+
+@get('/test')
+def test():
+    return {
+        '__template__': 'test.html'
     }
 
 
