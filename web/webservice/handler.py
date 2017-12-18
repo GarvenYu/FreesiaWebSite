@@ -84,6 +84,8 @@ async def get_blogs(*, page='1'):
     if blog_num == 0:
         return dict(page=page, blogs=())
     blogs = await Blog.find_all(orderBy='created_at desc', limit=(page.offset, page.limit))
+    if not isinstance(blogs, list):
+        blogs = [blogs]
     return dict(page=page, blogs=blogs)
 
 
@@ -98,7 +100,7 @@ def save_blog(*, title, summary, content):
         raise APIValueError('content field', '内容不能为空.')
     blog = Blog(id=None, user_id='001510478227665db0b9bb1767b4aacb66239ff8e2ad1c6000', user_name='Test',
                 user_image='about:blank', title=title, summary=summary, content=content, created_at=None)
-    yield from blog.save_one_blog()
+    yield from blog.save_one_blog
     return blog
 
 
@@ -109,6 +111,11 @@ def find_blog(**kw):
         '__template__': 'show_blog.html',
         'blog': blog
     }
+
+
+@get('/api/blogs/delete/{id}')
+def delete_blog(**kw):
+    blog = yield from Blog.delete_blog(kw.get('id'))
 
 
 @get('/register')

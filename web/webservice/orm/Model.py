@@ -204,6 +204,17 @@ class Model(dict, metaclass=ModelMetaclass):
             logging.info(str(rs))
             return cls(**rs[0])
 
+    @classmethod
+    @asyncio.coroutine
+    def delete_blog(cls, args):
+        """
+        根据主键删除博客
+        :param args: cls:传递当前类对象; args:id
+        :return:
+        """
+        rs = yield from execute(cls.__delete__, args)
+        if rs != 1:
+            logging.warning('failed to delete record: affected rows: %s' % rs)
 
 
 
