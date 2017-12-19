@@ -99,8 +99,8 @@ def save_blog(*, title, summary, content):
     if content is None or content.strip() == '':
         raise APIValueError('content field', '内容不能为空.')
     blog = Blog(id=None, user_id='001510478227665db0b9bb1767b4aacb66239ff8e2ad1c6000', user_name='Test',
-                user_image='about:blank', title=title, summary=summary, content=content, created_at=None)
-    yield from blog.save_one_blog
+                user_image='about:blank', title=title.strip(), summary=summary.strip(), content=content, created_at=None)
+    yield from blog.save_one_blog()
     return blog
 
 
@@ -113,9 +113,18 @@ def find_blog(**kw):
     }
 
 
+@get('/api/blogs/edit')
+def edit_blog(**kw):
+    blog = yield from Blog.find_blog(kw.get('id'))
+    return {
+        '__template__': 'edit_blog.html',
+        'blog': blog
+    }
+
+
 @get('/api/blogs/delete/{id}')
 def delete_blog(**kw):
-    blog = yield from Blog.delete_blog(kw.get('id'))
+    yield from Blog.delete_blog(kw.get('id'))
 
 
 @get('/register')

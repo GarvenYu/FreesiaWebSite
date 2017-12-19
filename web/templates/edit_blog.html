@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}写博客{% endblock %}
+
+{% block beforehead %}
+<link rel="stylesheet" href="/static/css/editormd.css"/>
+<script src="/static/js/editormd.js"></script>
+<script>
+    $(function () {
+
+        var testEditor = editormd("test-editormd", {
+        width   : "1200px",
+        height  : 640,
+        syncScrolling : "single",
+        path: "/static/editormd/lib/"
+    });
+
+
+        $('#loading').hide();
+
+        initVM({
+            title: '',
+            summary: '',
+            content: ''
+        },testEditor);
+});
+
+</script>
+
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1 uk-margin-bottom">
+        <div class="uk-panel uk-panel-box">
+            <ul class="uk-breadcrumb">
+                <li><a href="">评论</a></li>
+                <li><a href="/manage/blogs">日志</a></li>
+                <li><a href="">用户</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="error" class="uk-width-1-1">
+    </div>
+
+    <!--<div id="loading" class="uk-width-1-1 uk-text-center">-->
+        <!--<span><i class="uk-icon-spinner uk-icon-medium uk-icon-spin"></i> 正在加载...</span>-->
+    <!--</div>-->
+
+    <div id="vm" class="uk-width-2-3">
+        <form class="uk-form uk-form-stacked" enctype="application/x-www-form-urlencoded">
+            <!--action="/api/saveBlog" method="post"-->
+            <div class="uk-alert uk-alert-danger uk-hidden"></div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">标题:</label>
+                <div class="uk-form-controls">
+                    <input value="{{blog.title}}" name="title" type="text" placeholder="标题" class="uk-width-1-1">
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">摘要:</label>
+                <div class="uk-form-controls">
+                    <textarea rows="4" name="summary" placeholder="摘要" class="uk-width-1-1" style="resize:none;">{{blog.summary}}</textarea>
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <label class="uk-form-label">内容:</label>
+                <div class="editormd" id="test-editormd" >
+                    <textarea class="editormd-markdown-textarea" name="test-editormd-markdown-doc">{{blog.content}}</textarea>
+                    <textarea class="editormd-html-textarea" name="test-editormd-html-code"></textarea>
+                </div>
+            </div>
+            <div class="uk-form-row">
+                <button type="submit" class="uk-button uk-button-primary"><i class="uk-icon-save"></i> 保存</button>
+                <a href="/manage/blogs" class="uk-button"><i class="uk-icon-times"></i>取消</a>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
