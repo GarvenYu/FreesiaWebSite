@@ -104,6 +104,11 @@ def save_blog(*, title, summary, content):
     return blog
 
 
+@post('/api/updateBlog')
+def update_blog(*, title, summary):
+    logging.info('更新博客'+title+'  '+summary)
+
+
 @get('/api/blogs/{id}')
 def find_blog(**kw):
     blog = yield from Blog.find_blog(kw.get('id'))

@@ -10,7 +10,7 @@ import logging, json
 @web.middleware
 async def logger_middleware(request, handler):
     resp = await handler(request)
-    logging.info('logger_middleware'+str(resp))
+    logging.info('logger_middleware info is '+str(resp))
     logging.info('Request: %s %s' % (request.method, request.path))
     # await asyncio.sleep(0.3)
     return resp
@@ -62,7 +62,7 @@ async def response_middleware(app, handler):
 # 解析客户端发送的cookie
 @web.middleware
 async def cookie_middleware(request, handler):
-    logging.info('check cookie: %s,%s' % (request.method, request.path))
+    logging.info('check cookie: request method is %s, request path is %s' % (request.method, request.path))
     cookie_str = request.cookies.get(COOKIE_NAME)
     if cookie_str:
         user = await cookie2user(cookie_str)
