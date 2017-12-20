@@ -105,8 +105,9 @@ def save_blog(*, title, summary, content):
 
 
 @post('/api/updateBlog')
-def update_blog(*, title, summary):
-    logging.info('更新博客'+title+'  '+summary)
+def update_blog(*, title, summary, content):
+    logging.info('更新博客'+title+'  '+summary+' '+content)
+    return '更新成功'
 
 
 @get('/api/blogs/{id}')
