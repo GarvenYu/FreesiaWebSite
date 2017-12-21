@@ -19,6 +19,7 @@ $(function () {
         event.preventDefault();
 //        var params = $("#myform").serialize();
         var data = {
+            blog_id: '{{blog.id}}',
             title:$("#title").val(),
             summary:$("#summary").val(),
             content:testEditor.getMarkdown()

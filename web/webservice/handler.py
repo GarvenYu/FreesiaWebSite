@@ -100,13 +100,13 @@ def save_blog(*, title, summary, content):
         raise APIValueError('content field', '内容不能为空.')
     blog = Blog(id=None, user_id='001510478227665db0b9bb1767b4aacb66239ff8e2ad1c6000', user_name='Test',
                 user_image='about:blank', title=title.strip(), summary=summary.strip(), content=content, created_at=None)
-    yield from blog.save_one_blog()
+    rows = yield from blog.save_one_blog()
     return blog
 
 
 @post('/api/updateBlog')
-def update_blog(*, title, summary, content):
-    logging.info('更新博客'+title+'  '+summary+' '+content)
+def update_blog(*, blog_id, title, summary, content):
+    logging.info(Blog.__update__)
     return '更新成功'
 
 

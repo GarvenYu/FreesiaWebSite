@@ -188,6 +188,7 @@ class Model(dict, metaclass=ModelMetaclass):
         rows = yield from execute(self.__insert__, args)
         if rows != 1:
             logging.warning('failed to insert record: affected rows: %s' % rows)
+            return rows
 
     @classmethod
     @asyncio.coroutine

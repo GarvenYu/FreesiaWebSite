@@ -17,7 +17,7 @@ function initVM(data) {
                 location.assign('/api/blogs/edit?id=' + blog.id);
             },
             delete_blog: function (blog) {
-                if (confirm('确认要删除“' + blog.name + '”？删除后不可恢复！')) {
+                if (confirm('确认要删除“ ' + blog.title + ' ”？')) {
                     getJSON('/api/blogs/delete/'+ blog.id, function (err, r) {
                         if (err) {
                             return alert(err.message || err.error || err);
@@ -50,9 +50,9 @@ $(function() {
     <div class="uk-width-1-1 uk-margin-bottom">
         <div class="uk-panel uk-panel-box">
             <ul class="uk-breadcrumb">
-                <li><a href="/manage/comments">评论</a></li>
-                <li class="uk-active"><span>日志</span></li>
-                <li><a href="/manage/users">用户</a></li>
+                <li><a href="/manage/comments">管理评论</a></li>
+                <li class="uk-active"><span>管理日志</span></li>
+                <li><a href="/manage/users">管理用户</a></li>
             </ul>
         </div>
     </div>
