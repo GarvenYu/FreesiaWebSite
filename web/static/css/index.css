@@ -1,11 +1,12 @@
 @charset "gb2312";
 .container {
-	background: #e5e5e5;
+	/*background: #e5e5e5;*/
 	overflow: hidden;
-	width: 1000px;
+	width: 100%;
+    min-height: 100%;
 	margin: auto;
-	border-left: #d2d2d2 1px solid;
-	border-right: #d2d2d2 1px solid;
+	/*border-left: #d2d2d2 1px solid;*/
+	/*border-right: #d2d2d2 1px solid;*/
 }
 .blank20 {
 	height: 20px;

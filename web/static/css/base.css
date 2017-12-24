@@ -4,10 +4,14 @@
 	margin: 0;
 	padding: 0
 }
-body {
+html,body {
 	font: 14px "ËÎÌו", Arial, Helvetica, sans-serif;
 	color: #666666;
-	background: url(../images/bg.jpg) repeat
+	background: url(../images/bg.jpg) repeat;
+	width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
 }
 img {
 	border: 0;
@@ -69,6 +73,7 @@ a:hover {
 #wrapper {
 	background: url(../images/footside.jpg) bottom center no-repeat;
 	overflow: hidden;
+	min-height: fill-available;
 }
 header {
 	width: 100%;
@@ -103,15 +108,16 @@ header {
 	background-color: #e5e5e5;
 }
 .input_submit {
-	background-color: #333;
+	background-color: orangered;
 	color: #FFF;
 	margin-left: 5px;
-	width: 50px;
+	width: 70px;
 	border: none;
 	cursor: pointer;
-	height: 28px;
+	height: 36px;
 	line-height: 28px;
 	border-radius: 5px;
+	float: right;
 }
 /*nav*/
 nav {
