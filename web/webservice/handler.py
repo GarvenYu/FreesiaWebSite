@@ -98,16 +98,25 @@ def save_blog(*, title, summary, content):
         raise APIValueError('summary field', '摘要不能为空.')
     if content is None or content.strip() == '':
         raise APIValueError('content field', '内容不能为空.')
-    blog = Blog(id=None, user_id='001510478227665db0b9bb1767b4aacb66239ff8e2ad1c6000', user_name='Test',
-                user_image='about:blank', title=title.strip(), summary=summary.strip(), content=content, created_at=None)
+    blog = Blog(id=None, title=title.strip(), summary=summary.strip(), content=content, created_at=None)
     rows = yield from blog.save_one_blog()
     return blog
 
 
 @post('/api/updateBlog')
 def update_blog(*, blog_id, title, summary, content):
-    logging.info(Blog.__update__)
-    return '更新成功'
+    if title is None or title.strip() == '':
+        raise APIValueError('title field', '标题不能为空.')
+    if summary is None or summary.strip() == '':
+        raise APIValueError('summary field', '摘要不能为空.')
+    if content is None or content.strip() == '':
+        raise APIValueError('content field', '内容不能为空.')
+    blog = Blog(id=blog_id, title=title.strip(), summary=summary.strip(), content=content, created_at=None)
+    rows = yield from blog.update_blog()
+    if rows == 1:
+        return '更新成功'
+    else:
+        return '更新失败'
 
 
 @get('/api/blogs/{id}')

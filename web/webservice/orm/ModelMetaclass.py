@@ -35,7 +35,7 @@ class ModelMetaclass(type):
                 if v.primary_key:
                     if primary_key_temp:  # 如果此时变量不为空说明之前出现了主键
                         raise RuntimeError("Duplicate primary key for Field :%s" % k)
-                    primary_key_temp = k  # 否则存储主键
+                    primary_key_temp = k  # 否则存储主键名称
                 else:
                     fields.append(k)
         if not primary_key_temp:

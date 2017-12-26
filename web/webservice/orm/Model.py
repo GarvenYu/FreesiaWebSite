@@ -125,7 +125,7 @@ class Model(dict, metaclass=ModelMetaclass):
     def find_all(cls, where=None, args=None, **kw):
         """
         根据查询条件得到某一实体或全体实体
-        :param where: where子句,参数值用？代替
+        :param where: where子句,参数值用？代替,'where id = ?'
         :param args: 参数
         :param kw: {'orderBy':'', 'limit':''}
         :return: user or user_list
@@ -180,15 +180,17 @@ class Model(dict, metaclass=ModelMetaclass):
     def save_one_blog(self):
         """
         保存博客
-        :return: None
+        :param self
+        :return: rows
         """
-        logging.info("method -> save_one_blog() ,fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
-        args = list(map(self.get_value_or_default, self.__fields__))
-        args.append(self.get_value_or_default(self.__primary_key__))
+        logging.info(
+            "method -> save_one_blog() ,fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
+        args = list(map(self.get_value_or_default, self.__fields__))  # 获取传入值或者默认值
+        args.append(self.get_value_or_default(self.__primary_key__))  # 生成主键值
         rows = yield from execute(self.__insert__, args)
         if rows != 1:
             logging.warning('failed to insert record: affected rows: %s' % rows)
-            return rows
+        return rows
 
     @classmethod
     @asyncio.coroutine
@@ -217,8 +219,20 @@ class Model(dict, metaclass=ModelMetaclass):
         if rs != 1:
             logging.warning('failed to delete record: affected rows: %s' % rs)
 
-
-
-
+    @asyncio.coroutine
+    def update_blog(self):
+        """
+        根据主键更新博客
+        :param self
+        :return: rows
+        """
+        logging.info(
+            "method -> update_blog() ,fields[] -> %s , primaryKey -> %s  " % (self.__fields__, self.__primary_key__))
+        args = list(map(self.get_value_or_default, self.__fields__))
+        args.append(self.get_value_or_default(self.__primary_key__))
+        rows = yield from execute(self.__update__, args)
+        if rows != 1:
+            logging.warning('failed to insert record: affected rows: %s' % rows)
+        return rows
 
 
