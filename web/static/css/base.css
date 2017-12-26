@@ -47,10 +47,11 @@ a:hover {
 	clear: both
 }
 .f_l {
-	float: left
+	float: none;
+    text-align: center;
 }
 .f_r {
-	float: right
+	float: none;
 }
 /*topnav*/
 .topnav {
@@ -208,5 +209,5 @@ footer {
 	line-height: 24px;
 }
 .textr {
-	text-align: right
+	text-align: center;
 }

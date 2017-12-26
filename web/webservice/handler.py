@@ -12,16 +12,16 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
+# @get('/main')
+# async def index():
+#     # users = await User.find_all()
+#     return {
+#         '__template__': 'blog_list.html'
+#         # 'users': users
+#     }
+
+
 @get('/main')
-async def index():
-    # users = await User.find_all()
-    return {
-        '__template__': 'blog_list.html'
-        # 'users': users
-    }
-
-
-@get('/blog/blogList')
 async def get_blog_list(*, page='1'):
     # summary = 'catch me if you can'
     # blogs = [
