@@ -13,6 +13,34 @@
     <script src="/static/js/uikit.js"></script>
     <script src="/static/js/vue.min.js"></script>
     <script src="/static/js/awesome.js"></script>
+
+    <script>
+        function initVMB(data) {
+        var vm = new Vue({
+        el: '#vm',
+        data: {
+            allblogs: data.allblogs
+        }
+    });
+ $('#vm').show();
+}
+
+        function subgo() {
+            $.UIkit.offcanvas.show('#offcanvas-1');
+
+            $.ajax({
+            type: "GET",
+            url: "/allblogs",
+            dataType:'json',
+            success:function(blogs){
+              console.log(blogs);
+                initVMB(blogs);
+            }
+        });
+        }
+
+    </script>
+
     {% block beforehead %}<!-- before head  -->{% endblock %}
 </head>
 <body>
@@ -23,9 +51,61 @@
             <a href="/" class="uk-navbar-brand">Hi,I'm Freesia</a>
             <ul class="uk-navbar-nav">
                 <li data-url="blogs"><a href="/main"><i class="uk-icon-home"></i>Freesia主页</a></li>
-                <li><a target="_blank" href=""><i class="uk-icon-book"></i>所有文章</a></li>
+                <li><a target="_blank" href="javascript:void(0)" onclick="subgo()" data-uk-offcanvas><i class="uk-icon-book"></i>所有博客</a></li>
                 <li><a target="_blank" href=""><i class="uk-icon-tag"></i>心情</a></li>
             </ul>
+
+            <div id="offcanvas-1" class="uk-offcanvas">
+
+                                <div class="uk-offcanvas-bar" id="vm">
+                                    <ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon"data-uk-nav>
+                                        <li class="uk-active"><a href="#">所有博客</a></li>
+                                        <li class="uk-nav-divider"></li>
+                                    </ul>
+
+                                    <ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" v-repeat="blog: allblogs" data-uk-nav>
+                                        <li>
+                                            <a v-attr="href:'/api/blogs/'+blog.id" v-text="blog.title"></a>
+                                            <!--<ul class="uk-nav-sub">-->
+                                                <!--<li><a v-attr="href:'/api/blogs/'+blog.id" v-text="blog.title"></a></li>-->
+                                                <!--<li><a href="">Sub item</a>-->
+                                                    <!--<ul>-->
+                                                        <!--<li><a href="">Sub item</a></li>-->
+                                                        <!--<li><a href="">Sub item</a></li>-->
+                                                    <!--</ul>-->
+                                                <!--</li>-->
+                                            <!--</ul>-->
+                                        </li>
+                                    </ul>
+                                        <!--<li class="uk-parent">-->
+                                            <!--<a href="#">Parent</a>-->
+                                            <!--<ul class="uk-nav-sub">-->
+                                                <!--<li><a href="">Sub item</a></li>-->
+                                                <!--<li><a href="">Sub item</a></li>-->
+                                            <!--</ul>-->
+                                        <!--</li>-->
+
+                                    <!--<ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav>-->
+                                        <!--<li class="uk-parent">-->
+                                            <!--<a href="#">Parent</a>-->
+                                            <!--<ul class="uk-nav-sub">-->
+                                                <!--<li><a href="">Sub item</a></li>-->
+                                                <!--<li><a href="">Sub item</a></li>-->
+                                            <!--</ul>-->
+                                        <!--</li>-->
+                                        <!--<li class="uk-nav-header">Header</li>-->
+                                        <!--<li class="uk-parent"><a href=""><i class="uk-icon-star"></i> Parent</a></li>-->
+                                        <!--<li><a href=""><i class="uk-icon-twitter"></i> Item</a></li>-->
+                                        <!--<li class="uk-nav-divider"></li>-->
+                                        <!--<li><a href=""><i class="uk-icon-rss"></i> Item</a></li>-->
+                                    <!--</ul>-->
+
+                                </div>
+
+                            </div>
+
+
+
             <div class="uk-navbar-flip">
                 <ul class="uk-navbar-nav">
                 {% if __user__ %}

@@ -1,34 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %}日志{% endblock %}
+{% block title %}Freesia主页{% endblock %}
 
 {% block beforehead %}
 <script>
+
 function initVM(data) {
     var vm = new Vue({
-        el: '#vm',
+        el: '#vmd',
         data: {
             blogs: data.blogs,
             page: data.page
-        },
-        methods: {
-            edit_blog: function (blog) {
-                location.assign('/manage/blogs/edit?id=' + blog.id);
-            },
-            delete_blog: function (blog) {
-                if (confirm('确认要删除“' + blog.name + '”？删除后不可恢复！')) {
-                    postJSON('/api/blogs/' + blog.id + '/delete', function (err, r) {
-                        if (err) {
-                            return alert(err.message || err.error || err);
-                        }
-                        refresh();
-                    });
-                }
-            }
         }
     });
-    $('#vm').show();
+    $('#vmd').show();
 }
+
 $(function() {
     getJSON('/api/blogs', {
         page: '{{ page_index }}'
@@ -36,6 +23,7 @@ $(function() {
         if (err) {
             return fatal(err);
         }
+        console.log(results);
         $('#loading').hide();
         initVM(results);
     });
@@ -47,7 +35,7 @@ $(function() {
 
 <div class="uk-width-medium-3-4">
 
-        <div id="vm" class="uk-width-1-1">
+        <div id="vmd" class="uk-width-1-1">
 
             <ul v-repeat="blog: blogs" >
                             <article class="uk-article">
@@ -65,6 +53,15 @@ $(function() {
     </div>
     <div class="uk-width-medium-1-4">
         <div class="uk-panel uk-panel-header">
+            <h3 class="uk-panel-title">所有博客</h3>
+            <ul class="uk-list uk-list-line">
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="">编程</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="">读书</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="">Python教程</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="">Git教程</a></li>
+            </ul>
+        </div>
+        <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">友情链接</h3>
             <ul class="uk-list uk-list-line">
                 <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="">编程</a></li>
@@ -74,6 +71,7 @@ $(function() {
             </ul>
         </div>
     </div>
+
 {% endblock %}
 {% block footdiv %}
 

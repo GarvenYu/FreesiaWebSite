@@ -1,29 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script src="/static/js/jquery-3.2.1.js"></script>
-    <link rel="stylesheet" href="/static/css/editormd.css"/>
-    <script src="/static/js/editormd.js"></script>
-    <script type="text/javascript">
-$(function() {
-    editormd("test-editormd", {
-        width   : "90%",
-        height  : 640,
-        syncScrolling : "single",
-        //你的lib目录的路径，我这边用JSP做测试的
-        path: "/static/editormd/lib/",
-        //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
-        saveHTMLToTextarea : true
-    });
-});
-    </script>
-</head>
-<body>
-    <div class="editormd" id="test-editormd">
-<textarea class="editormd-markdown-textarea" name="test-editormd-markdown-doc"></textarea>
-<!-- 第二个隐藏文本域，用来构造生成的HTML代码，方便表单POST提交，这里的name可以任意取，后台接受时以这个name键为准 -->
-<textarea class="editormd-html-textarea" name="text"></textarea>
+{% extends 'base.html' %}
+
+{% block title %}Freesia主页{% endblock %}
+
+{% block beforehead %}
+{% endblock %}
+
+{% block content %}
+
+<div class="uk-width-medium-3-4">
+        {% for blog in blogs %}
+            <article class="uk-article">
+                <h2><a href="/blog/{{ blog.id }}">{{ blog.name }}</a></h2>
+                <p class="uk-article-meta">发表于{{ blog.created_at}}</p>
+                <p>{{ blog.summary }}</p>
+                <p><a href="/blog/{{ blog.id }}">继续阅读 <i class="uk-icon-angle-double-right"></i></a></p>
+            </article>
+            <hr class="uk-article-divider">
+        {% endfor %}
+    </div>
+
+    <div class="uk-width-medium-1-4">
+        <div class="uk-panel uk-panel-header">
+            <h3 class="uk-panel-title">友情链接</h3>
+            <ul class="uk-list uk-list-line">
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">编程</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">读书</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">Python教程</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">Git教程</a></li>
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
+{% block footdiv %}
+
+  <footer>
+    <div class="footer">
+      <div class="f_l">
+                <p>All Rights Reserved 版权所有：<a href="">Freesia</a> 备案号：</p>
+          </div>
+            <div class="f_l">
+
+                <p>
+                    <a target="_blank" href="" class="uk-icon-button uk-icon-weibo"></a>
+                    <a target="_blank" href="https://github.com/GarvenYu/" class="uk-icon-button uk-icon-github"></a>
+                    <a target="_blank" href="" class="uk-icon-button uk-icon-linkedin-square"></a>
+                    <a target="_blank" href="" class="uk-icon-button uk-icon-twitter"></a>
+                </p>
+            </div>
+
 </div>
-</body>
-</html>
+  </footer>
+
+{% endblock %}

@@ -23,6 +23,11 @@ logging.basicConfig(level=logging.INFO)
 
 @get('/main')
 async def get_blog_list(*, page='1'):
+    """
+    获取主页博客列表
+    :param page: 默认页数1
+    :return:
+    """
     # summary = 'catch me if you can'
     # blogs = [
     #     Blog(id='1', name='Test Blog', summary=summary, created_at=time.time() - 120),
@@ -41,12 +46,36 @@ async def get_blog_list(*, page='1'):
     }
 
 
+@get('/allblogs')
+def get_all_blogs():
+    """
+    获取所有博客
+    :return:
+    """
+    blog_num = yield from Blog.find_number('count(id)')
+    if blog_num == 0:
+        return dict(blogs=())
+    blogs = yield from Blog.find_all(orderBy='created_at desc')
+    if not isinstance(blogs, list):
+        blogs = [blogs]
+    return dict(allblogs=blogs)
+
+
 @get('/manage/blog/writeBlog')
 def write_blog():
+    """
+    编辑博客
+    :return: 编辑页面,URL
+    """
     return dict(__template__='write_blog.html', id='', action='/api/saveBlog')
 
 
 def get_page_index(page_str):
+    """
+    将页数从字符串类型转换为int类型
+    :param page_str: 页数
+    :return: int(page_str)
+    """
     p = 1
     try:
         p = int(page_str)
@@ -59,6 +88,11 @@ def get_page_index(page_str):
 
 @get('/manage/blogs')
 def manage_blogs(*, page='1'):
+    """
+    请求后台管理页面
+    :param page: 第一页
+    :return: 页面,页数
+    """
     return {
         '__template__': 'manage_blog.html',
         'page_index': get_page_index(page)
@@ -91,6 +125,13 @@ async def get_blogs(*, page='1'):
 
 @post('/api/saveBlog')
 def save_blog(*, title, summary, content):
+    """
+    保存博客
+    :param title: 标题
+    :param summary: 总结
+    :param content: 内容
+    :return: blog
+    """
     # 检查是否是管理员身份 后续更新
     if title is None or title.strip() == '':
         raise APIValueError('title field', '标题不能为空.')
@@ -105,6 +146,14 @@ def save_blog(*, title, summary, content):
 
 @post('/api/updateBlog')
 def update_blog(*, blog_id, title, summary, content):
+    """
+    更新博客
+    :param blog_id:主键
+    :param title: 标题
+    :param summary: 总结
+    :param content: 内容
+    :return: Str
+    """
     if title is None or title.strip() == '':
         raise APIValueError('title field', '标题不能为空.')
     if summary is None or summary.strip() == '':
@@ -121,6 +170,11 @@ def update_blog(*, blog_id, title, summary, content):
 
 @get('/api/blogs/{id}')
 def find_blog(**kw):
+    """
+    博客详情
+    :param kw: dict(id=blog_id)
+    :return: 页面,blog
+    """
     blog = yield from Blog.find_blog(kw.get('id'))
     return {
         '__template__': 'show_blog.html',
@@ -130,6 +184,11 @@ def find_blog(**kw):
 
 @get('/api/blogs/edit')
 def edit_blog(**kw):
+    """
+    请求更新博客
+    :param kw: dict(id=blog_id)
+    :return: 页面,blog
+    """
     blog = yield from Blog.find_blog(kw.get('id'))
     return {
         '__template__': 'edit_blog.html',
@@ -139,6 +198,11 @@ def edit_blog(**kw):
 
 @get('/api/blogs/delete/{id}')
 def delete_blog(**kw):
+    """
+    删除博客
+    :param kw: dict(id=blog_id)
+    :return:
+    """
     yield from Blog.delete_blog(kw.get('id'))
 
 
